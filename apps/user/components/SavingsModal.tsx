@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Calculator } from "lucide-react";
 import { Modal } from "./Modal";
 import type { FuelPricesPublic } from "@/lib/api";
@@ -31,12 +31,14 @@ export function SavingsModal({
   settings: CalculatorSettings;
 }) {
   const factor = settings.lpgMileageFactor || 0.9;
+  const initialPetrol = prices.petrol ? String(prices.petrol) : "";
+  const initialLpg = prices.autoLPG ? String(prices.autoLPG) : "";
 
   const [step, setStep] = useState<"form" | "result">("form");
-  const [km, setKm] = useState("50");
-  const [petrolMileage, setPetrolMileage] = useState("15");
-  const [petrolCost, setPetrolCost] = useState(prices.petrol ? String(prices.petrol) : "");
-  const [lpgCost, setLpgCost] = useState(prices.autoLPG ? String(prices.autoLPG) : "");
+  const [km, setKm] = useState("");
+  const [petrolMileage, setPetrolMileage] = useState("");
+  const [petrolCost, setPetrolCost] = useState(initialPetrol);
+  const [lpgCost, setLpgCost] = useState(initialLpg);
   const [kitCost, setKitCost] = useState("");
 
   const r = useMemo(() => {
@@ -55,13 +57,24 @@ export function SavingsModal({
     return { pFuel, lMileage, lFuel, pExpense, lExpense, daily, monthly, yearly, roi };
   }, [km, petrolMileage, petrolCost, lpgCost, kitCost, factor]);
 
-  const reset = () => {
+  // Every field the visitor fills in starts blank; only the petrol/LPG unit
+  // prices are seeded from the live rates.
+  const reset = useCallback(() => {
     setKm("");
     setPetrolMileage("");
-    setPetrolCost("");
-    setLpgCost("");
     setKitCost("");
-  };
+    setPetrolCost(initialPetrol);
+    setLpgCost(initialLpg);
+  }, [initialPetrol, initialLpg]);
+
+  // This component stays mounted while the modal is shut, so without this the
+  // previous visitor's figures would still be there on the next open.
+  useEffect(() => {
+    if (!open) return;
+    setStep("form");
+    reset();
+  }, [open, reset]);
+
   // Modal stays mounted across open/close, so return to the form on close.
   const close = () => { setStep("form"); onClose(); };
 
