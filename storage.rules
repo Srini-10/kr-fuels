@@ -1,0 +1,48 @@
+rules_version = '2';
+
+// KR Fuels Cloud Storage (bucket `krfuelsgfivibuh.appspot.com`).
+//
+// Two very different consumers share this one bucket:
+//
+//  1. The Next.js apps NEVER touch Storage from the client SDK. Every upload and
+//     delete goes through the backend API, which uses the Admin SDK and so
+//     BYPASSES these rules entirely. Those objects are then made public with
+//     makePublic() and served from storage.googleapis.com/<bucket>/<path>, a
+//     plain GCS URL governed by object ACLs rather than by this file.
+//
+//  2. The Flutter app (krfuels_gfi_vibuh) DOES use the Storage client SDK, and
+//     ships with no firebase_auth at all — every request it makes is anonymous.
+//     Its reads are therefore the only traffic these rules actually gate, and
+//     they are what broke when the test-mode rules expired.
+//
+// So: public read on the prefixes that are already public anyway, and no client
+// writes from anywhere. Locking writes costs nothing — the only client-SDK write
+// in either codebase is in the Flutter screen add_images_for_stations.dart,
+// which is orphaned (nothing navigates to AddNewStationScreen), and station
+// image uploads are handled by the admin panel through the backend instead.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Read by the Flutter app via the client SDK (anonymous) ──────────────
+    // listAll() + getDownloadURL(); `read` covers both get and list.
+    match /StationImages/{allPaths=**}  { allow read: if true; }
+    match /KRGFI_Gallery/{allPaths=**}  { allow read: if true; }
+    match /ConversionKits/{allPaths=**} { allow read: if true; }
+
+    // ── Written by the backend Admin SDK, served as public GCS URLs ─────────
+    // Already world-readable via makePublic(); listing them here only keeps the
+    // Firebase SDK path consistent with the ACLs and adds no new exposure.
+    match /clients/{allPaths=**}      { allow read: if true; }
+    match /hero/{allPaths=**}         { allow read: if true; }
+    match /home-video/{allPaths=**}   { allow read: if true; }
+    match /journey/{allPaths=**}      { allow read: if true; }
+    match /products/{allPaths=**}     { allow read: if true; }
+    match /seo-settings/{allPaths=**} { allow read: if true; }
+    match /stations/{allPaths=**}     { allow read: if true; }
+    match /testimonials/{allPaths=**} { allow read: if true; }
+
+    // ── Everything else: no direct client access ────────────────────────────
+    // Writes included: uploads run server-side through the Admin SDK.
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}
