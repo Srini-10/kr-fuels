@@ -1,5 +1,6 @@
-// Canonical catalog for the four product screens (/products = Auto LPG, plus the
-// krfuels.com-matching routes /conversionkit, /lubricants, /tanks).
+// Canonical catalog for the product screens (/products = Auto LPG, plus the
+// krfuels.com-matching routes /conversionkit, /tanks). The Lubricants entry is
+// retired — kept commented out at the bottom of PRODUCT_CATALOG.
 //
 // DYNAMIC-FIRST: each entry mirrors a `products` Firestore record (matched by an
 // explicit `slug` or by category/name keywords). The detail page renders the live
@@ -181,45 +182,59 @@ export const PRODUCT_CATALOG: ProductDetail[] = [
     externalUrl: "http://krgfi.com/tanks.php",
     match: ["tank", "multivalve", "valve"],
   },
-  {
-    slug: "lubricants",
-    href: "/lubricants",
-    image: "/assets/products/lubricants.jpg",
-    label: "Lubricants",
-    category: "Lubricants",
-    icon: "droplets",
-    tagline: "Specialised lubricants formulated for lpg / cng engines.",
-    intro:
-      "Lubricant is a thin film, Generally composed of 70% base oil and 30% additives, Which helps to keep your engine running at its best. Our veedol lubricants are formulated for lpg and cng vehicles to protect the engine, Reduce wear and extend its life.",
-    sections: [
-      {
-        heading: "What a lubricant does",
-        items: [
-          "Lubricate — reduces friction, Engine wear and fuel consumption",
-          "Clean — clears piston varnish and deposit sludge in the sump",
-          "Protect — guards against acid corrosion and rust",
-          "Cool & seal the engine",
-        ],
-      },
-      {
-        heading: "Benefits of quality lubricants",
-        items: [
-          "Better mileage",
-          "High performance",
-          "Less maintenance cost",
-          "Longer engine life",
-          "Engine runs smoothly",
-        ],
-      },
-    ],
-    specs: [
-      { name: "Turbo Star 20W50 (LPG/CNG)", detail: "Available in 500 ml, 1 litre and 3 litre packs, plus loose dispensing" },
-      { name: "Take Off 2T", detail: "Dispensed loose through oil dispensers as per customer requirement at retail outlets" },
-    ],
-    externalUrl: "https://krfuels.com/lubricants.php",
-    match: ["lubric"],
-  },
+  // ── Lubricants — RETIRED (client request, no longer offered on the website).
+  // Commented out rather than deleted so it can be restored verbatim: uncommenting
+  // this entry brings back the Products dropdown item, the footer link, and the
+  // /lubricants screen (see apps/user/app/lubricants/page.tsx + app/sitemap.ts).
+  // {
+  //   slug: "lubricants",
+  //   href: "/lubricants",
+  //   image: "/assets/products/lubricants.jpg",
+  //   label: "Lubricants",
+  //   category: "Lubricants",
+  //   icon: "droplets",
+  //   tagline: "Specialised lubricants formulated for lpg / cng engines.",
+  //   intro:
+  //     "Lubricant is a thin film, Generally composed of 70% base oil and 30% additives, Which helps to keep your engine running at its best. Our veedol lubricants are formulated for lpg and cng vehicles to protect the engine, Reduce wear and extend its life.",
+  //   sections: [
+  //     {
+  //       heading: "What a lubricant does",
+  //       items: [
+  //         "Lubricate — reduces friction, Engine wear and fuel consumption",
+  //         "Clean — clears piston varnish and deposit sludge in the sump",
+  //         "Protect — guards against acid corrosion and rust",
+  //         "Cool & seal the engine",
+  //       ],
+  //     },
+  //     {
+  //       heading: "Benefits of quality lubricants",
+  //       items: [
+  //         "Better mileage",
+  //         "High performance",
+  //         "Less maintenance cost",
+  //         "Longer engine life",
+  //         "Engine runs smoothly",
+  //       ],
+  //     },
+  //   ],
+  //   specs: [
+  //     { name: "Turbo Star 20W50 (LPG/CNG)", detail: "Available in 500 ml, 1 litre and 3 litre packs, plus loose dispensing" },
+  //     { name: "Take Off 2T", detail: "Dispensed loose through oil dispensers as per customer requirement at retail outlets" },
+  //   ],
+  //   externalUrl: "https://krfuels.com/lubricants.php",
+  //   match: ["lubric"],
+  // },
 ];
+
+// Product slugs retired from the website (client request). Every product route —
+// /lubricants and /products/<slug> — 404s for these, even while a matching record
+// still exists in the admin panel's Products collection. Drop a slug from this set
+// to bring its page back.
+export const RETIRED_PRODUCT_SLUGS = new Set(["lubricants"]);
+
+export function isRetiredProduct(slug: string): boolean {
+  return RETIRED_PRODUCT_SLUGS.has(slug.trim().toLowerCase());
+}
 
 export const PRODUCT_CATALOG_BY_SLUG: Record<string, ProductDetail> = Object.fromEntries(
   PRODUCT_CATALOG.map((p) => [p.slug, p]),
@@ -230,7 +245,7 @@ export function getProductDetail(slug: string): ProductDetail | null {
 }
 
 /**
- * Resolve any product-like record (backend or fallback) to one of our four detail
+ * Resolve any product-like record (backend or fallback) to one of our detail
  * slugs: explicit `slug` wins, otherwise we match on category/name keywords.
  */
 export function productSlug(p: {

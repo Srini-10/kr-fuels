@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ArrowRight, Check, Fuel, Wrench, Droplets, Cylinder, type LucideIcon } from "lucide-react";
 import { getProducts } from "@/lib/api";
 import { normalizeUrl } from "@kr/shared/lib/utils";
-import { getProductDetail, productSlug, type ProductIcon } from "@/lib/products";
+import { getProductDetail, isRetiredProduct, productSlug, type ProductIcon } from "@/lib/products";
 
 const ICONS: Record<ProductIcon, LucideIcon> = {
   fuel: Fuel, wrench: Wrench, droplets: Droplets, cylinder: Cylinder,
@@ -14,6 +14,10 @@ const ICONS: Record<ProductIcon, LucideIcon> = {
 // Merge Firestore record (admin-controlled) over hardcoded catalog (fallbacks).
 // Firestore wins for every field it has; catalog fills any gap so pages never blank.
 async function resolve(slug: string) {
+  // Retired products (e.g. Lubricants) are off the website regardless of what the
+  // admin panel still holds — returning null makes every route for them 404.
+  if (isRetiredProduct(slug)) return null;
+
   const detail = getProductDetail(slug);         // catalog fallback
   const { data } = await getProducts();
   // Match by explicit slug first, then by category/name keywords.

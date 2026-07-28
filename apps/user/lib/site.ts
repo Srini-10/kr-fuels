@@ -33,6 +33,10 @@ export const ADMIN_URL = (process.env.NEXT_PUBLIC_ADMIN_URL ?? "http://localhost
 export const ADMIN_LOGIN_URL = `https://webmail.krfuels.com/interface/root`;
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
+// Sister brand — the "Switch to VIBUH" button in the header top bar sends visitors
+// to the VIBUH site (same destination the Conversion Kits / Tanks menu items use).
+export const VIBUH_URL = "https://www.vibuh.com";
+
 // The admin writes the contact address as an OBJECT ({ street, city, state, pincode }),
 // but the header/footer/contact page render it as a single line. Normalize either an
 // address object or a plain string into one display string (falling back to BRAND).
@@ -66,9 +70,9 @@ export const NAV_LINKS = [
   { label: "Contact", href: "/contact" },
 ];
 
-// Products dropdown / footer menu — Auto LPG & Lubricants open internal screens;
-// Conversion Kits & Tanks link out to the manufacturer site (external). Derived
-// from the single-source product catalog.
+// Products dropdown / footer menu — Auto LPG opens an internal screen; Conversion
+// Kits & Tanks link out to the manufacturer site (external). Derived from the
+// single-source product catalog (Lubricants retired — see lib/products.ts).
 export const PRODUCT_MENU = PRODUCT_CATALOG.map((p) => ({
   label: p.label,
   href: p.href,
@@ -90,5 +94,6 @@ export const OFFERINGS = [
   { emoji: "⛽", title: "Auto LPG Fuel", desc: "Clean, Affordable fuel at every station." },
   { emoji: "🔧", title: "Conversion Kits", desc: "Bis-certified venturi & sequential kits." },
   { emoji: "🛡️", title: "Tanks & Multivalves", desc: "Safe, Certified storage solutions." },
-  { emoji: "🛢️", title: "Lubricants", desc: "Engine lubricants for lpg vehicles." },
+  // Lubricants retired (client request) — see lib/products.ts.
+  // { emoji: "🛢️", title: "Lubricants", desc: "Engine lubricants for lpg vehicles." },
 ];

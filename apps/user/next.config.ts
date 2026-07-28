@@ -6,6 +6,18 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname, "..", ".."),
   },
   transpilePackages: ["@kr/shared"],
+  // The Lubricants page is retired (client request). Both of its URLs permanently
+  // redirect to Products so old links, bookmarks and search results never land on a
+  // dead page. Handled here rather than by the page's notFound(), because those
+  // routes are ISR-prerendered — Next serves a prerendered not-found body with a
+  // 200 ("soft 404"), which search engines keep indexing. Delete this block (and
+  // restore the commented code in lib/products.ts) to bring the page back.
+  async redirects() {
+    return [
+      { source: "/lubricants", destination: "/products", permanent: true },
+      { source: "/products/lubricants", destination: "/products", permanent: true },
+    ];
+  },
   images: {
     // Allowed `quality` values for next/image. The full-screen station gallery
     // requests 90 for crisp, full-resolution viewing (75 is Next's default for

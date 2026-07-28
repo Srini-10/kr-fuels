@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Mail, Phone } from "lucide-react";
 import { ADMIN_LOGIN_URL, BRAND, PRODUCT_MENU, formatAddress } from "@/lib/site";
+import { resolveSocials } from "@/components/SocialIcons";
 import type { SiteSettings } from "@kr/shared/types";
 
 const QUICK_LINKS = [
@@ -23,8 +24,9 @@ export function Footer({
   const email = contact.essentials?.emails?.info || BRAND.email;
   const phone = contact.essentials?.phoneNos?.office || BRAND.phone;
   const address = formatAddress(contact.presents?.address);
-  const tags = site.footerTags?.length ? site.footerTags : ["Auto LPG", "Conversion Kits", "Lubricants", "LPG Stations", "FAQ"];
-  const socials = Object.entries(site.social ?? {}).filter(([, url]) => !!url) as [string, string][];
+  const tags = site.footerTags?.length ? site.footerTags : ["Auto LPG", "Conversion Kits", "LPG Stations", "FAQ"];
+  // Official brand icons, canonical order, blank/placeholder admin values dropped.
+  const socials = resolveSocials(site.social);
 
   return (
     <footer className="mt-0 bg-ink text-white/80">
@@ -43,10 +45,19 @@ export function Footer({
             <Link href={`tel:${phone}`} className="flex items-center gap-2 hover:text-lime"><Phone size={15} className="text-lime" />{phone}</Link>
           </div>
           {socials.length > 0 && (
-            <div className="mt-5 flex gap-2.5">
-              {socials.map(([key, url]) => (
-                <Link key={key} href={url} target="_blank" rel="noopener noreferrer" aria-label={key} title={key} className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/10 text-sm font-bold uppercase text-white transition hover:bg-brand">
-                  {key.charAt(0)}
+            <div className="mt-5 flex flex-wrap gap-2.5">
+              {socials.map(({ key, label, url, color, Icon }) => (
+                <Link
+                  key={key}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  title={label}
+                  style={{ ["--brand-social" as string]: color }}
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white hover:text-(--brand-social)"
+                >
+                  <Icon size={17} />
                 </Link>
               ))}
             </div>

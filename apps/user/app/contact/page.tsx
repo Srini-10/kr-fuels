@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MapPin, Mail, Phone, MessageCircle } from "lucide-react";
 import { getContact, getSiteSettings, getStations } from "@/lib/api";
 import { ContactPanels } from "@/components/ContactPanels";
+import { resolveSocials } from "@/components/SocialIcons";
 import { BRAND, formatAddress, getCoords } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -15,7 +16,8 @@ export const revalidate = 300;
 
 export default async function ContactPage() {
   const [contact, site, stations] = await Promise.all([getContact(), getSiteSettings(), getStations()]);
-  const socials = Object.entries(site.social ?? {}).filter(([, url]) => !!url) as [string, string][];
+  // Official brand icons, canonical order, blank/placeholder admin values dropped.
+  const socials = resolveSocials(site.social);
 
   const companyName = contact.essentials?.companyName || BRAND.name;
   const email = contact.essentials?.emails?.info || BRAND.email;
@@ -90,9 +92,18 @@ export default async function ContactPage() {
               <div className="card-soft">
                 <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-mutedfg">Follow us</div>
                 <div className="flex flex-wrap gap-3">
-                  {socials.map(([key, url]) => (
-                    <Link key={key} href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-brand-pale px-4 py-2.5 text-sm font-semibold capitalize text-brand transition hover:bg-brand hover:text-white">
-                      {key}
+                  {socials.map(({ key, label, url, color, Icon }) => (
+                    <Link
+                      key={key}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={label}
+                      title={label}
+                      style={{ ["--brand-social" as string]: color }}
+                      className="inline-flex items-center gap-2 rounded-xl bg-brand-pale px-4 py-2.5 text-sm font-semibold text-(--brand-social) transition hover:bg-(--brand-social) hover:text-white"
+                    >
+                      <Icon size={18} /> {label}
                     </Link>
                   ))}
                 </div>

@@ -1,6 +1,11 @@
-import { ProductScreenSkeleton } from "@/components/Skeleton";
+// import { ProductScreenSkeleton } from "@/components/Skeleton";
 
-// Instant shell for the Lubricants product screen.
+// The Lubricants screen is retired (see page.tsx), so there is no content to shell —
+// the route 404s immediately. Kept (commented) alongside the page for easy restore.
+// export default function LubricantsLoading() {
+//   return <ProductScreenSkeleton />;
+// }
+
 export default function LubricantsLoading() {
-  return <ProductScreenSkeleton />;
+  return null;
 }
