@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ArrowRight, Check, Fuel, Wrench, Droplets, Cylinder, type LucideIcon } from "lucide-react";
 import { getProducts } from "@/lib/api";
 import { normalizeUrl } from "@kr/shared/lib/utils";
-import { getProductDetail, productSlug, type ProductIcon } from "@/lib/products";
+import { getProductDetail, isRetiredProduct, productSlug, type ProductIcon } from "@/lib/products";
 
 const ICONS: Record<ProductIcon, LucideIcon> = {
   fuel: Fuel, wrench: Wrench, droplets: Droplets, cylinder: Cylinder,
@@ -14,6 +14,10 @@ const ICONS: Record<ProductIcon, LucideIcon> = {
 // Merge Firestore record (admin-controlled) over hardcoded catalog (fallbacks).
 // Firestore wins for every field it has; catalog fills any gap so pages never blank.
 async function resolve(slug: string) {
+  // Retired products (e.g. Lubricants) are off the website regardless of what the
+  // admin panel still holds — returning null makes every route for them 404.
+  if (isRetiredProduct(slug)) return null;
+
   const detail = getProductDetail(slug);         // catalog fallback
   const { data } = await getProducts();
   // Match by explicit slug first, then by category/name keywords.
@@ -32,16 +36,16 @@ async function resolve(slug: string) {
 
   return {
     isExternal: false,
-    name:     record?.product_name?.trim()  || detail?.label    || "",
+    name: record?.product_name?.trim() || detail?.label || "",
     category: record?.product_category?.trim() || detail?.category || "",
-    tagline:  record?.tagline?.trim()       || detail?.tagline   || "",
-    intro:    record?.description?.trim()   || detail?.intro     || "",
-    image:    record?.product_image?.trim() || detail?.image     || "",
-    gallery:  (record?.gallery_images ?? []).filter(Boolean),
+    tagline: record?.tagline?.trim() || detail?.tagline || "",
+    intro: record?.description?.trim() || detail?.intro || "",
+    image: record?.product_image?.trim() || detail?.image || "",
+    gallery: (record?.gallery_images ?? []).filter(Boolean),
     sections: record?.sections?.length ? record.sections : (detail?.sections ?? []),
-    specs:    record?.specs?.length     ? record.specs   : (detail?.specs    ?? []),
-    ctaPrimaryText:   record?.cta_primary_text   || "Find a station",
-    ctaPrimaryHref:   record?.cta_primary_href   || "/stations",
+    specs: record?.specs?.length ? record.specs : (detail?.specs ?? []),
+    ctaPrimaryText: record?.cta_primary_text || "Find a station",
+    ctaPrimaryHref: record?.cta_primary_href || "/stations",
     ctaSecondaryText: record?.cta_secondary_text || "Talk to our team",
     ctaSecondaryHref: record?.cta_secondary_href || "/contact",
     icon: detail?.icon ?? "fuel",
@@ -77,10 +81,10 @@ export default async function ProductScreen({ slug }: { slug: string }) {
         <div className="container-x py-12 lg:py-16">
           <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_1fr]">
             <div>
-              <span className="eyebrow mb-4">{r.category}</span>
+              {/* <span className="eyebrow mb-4">{r.category}</span> */}
               <h1 className="text-4xl font-extrabold text-ink sm:text-5xl">{r.name}</h1>
               {r.tagline && <p className="mt-4 max-w-xl text-lg text-mutedfg">{r.tagline}</p>}
-              {r.intro   && <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-ink/70">{r.intro}</p>}
+              {r.intro && <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-ink/70">{r.intro}</p>}
               <div className="mt-7 flex flex-wrap gap-3">
                 <Link href={r.ctaPrimaryHref} className="btn-primary">
                   {r.ctaPrimaryText} <ArrowRight size={16} />
@@ -91,8 +95,9 @@ export default async function ProductScreen({ slug }: { slug: string }) {
 
             <div>
               {r.image ? (
-                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-line shadow-[0_2px_18px_rgba(13,26,16,0.05)]">
-                  <Image src={r.image} alt={r.name} fill unoptimized loading="eager" sizes="(max-width: 1024px) 100vw, 40vw" className="object-cover" />
+                <div className="group relative aspect-[4/2.5] w-full overflow-hidden rounded-[20px] border border-line/70 bg-white shadow-[0_2px_18px_rgba(13,26,16,0.05)]">
+                  <Image src={r.image} alt={r.name} fill unoptimized sizes="(max-width: 1024px) 100vw, 40vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent pointer-events-none" />
                 </div>
               ) : (
                 <div className="grid aspect-[4/3] w-full place-items-center rounded-2xl border border-line bg-white shadow-[0_2px_18px_rgba(13,26,16,0.05)]">

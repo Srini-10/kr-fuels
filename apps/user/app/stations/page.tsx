@@ -22,8 +22,8 @@ export default async function StationsPage() {
     <>
       <section className="bg-gradient-to-b from-brand-pale/60 to-white">
         <div className="container-x py-14 text-center">
-          <span className="eyebrow mb-4">Station Network</span>
-          <h1 className="text-4xl font-extrabold text-ink sm:text-5xl">{fmtCount(count)} Auto LPG Stations</h1>
+          <span className="eyebrow mb-4">Station network</span>
+          <h1 className="text-4xl font-extrabold text-ink sm:text-5xl">{fmtCount(count)} Auto LPG stations</h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-mutedfg">
             Tamil Nadu's largest network — find the station nearest you.
           </p>

@@ -26,7 +26,7 @@ export type TableProps = {
   remove: (id: string) => void
 }
 
-const ENQUIRY_HEADS = ["Name", "Email", "Message", "Date", "Actions"]
+const ENQUIRY_HEADS = ["Name", "Email", "Phone", "Message", "Date", "Actions"]
 const FEEDBACK_HEADS = ["Name", "Email", "Phone", "Category", "Rating", "Station", "Feedback", "Date", "Status", "Actions"]
 
 const Table = (props: TableProps) => {
@@ -48,7 +48,9 @@ const Table = (props: TableProps) => {
   }
 
   if (loading) {
-    return <TableSkeleton rows={7} columns={tab === "feedback" ? 9 : 5} />
+    // Keep the loading skeleton exactly as wide as the real table (it was one
+    // column short for feedback, and the new Phone column widens enquiries).
+    return <TableSkeleton rows={7} columns={tab === "feedback" ? FEEDBACK_HEADS.length : ENQUIRY_HEADS.length} />
   }
 
   return (
@@ -107,9 +109,14 @@ const Table = (props: TableProps) => {
                       <td style={{ padding: "12px 16px", fontWeight: 500, color: C.t, fontSize: 13, whiteSpace: "nowrap" }}>{s.name}</td>
                       <td style={{ padding: "12px 16px", fontSize: 12, color: C.tm, whiteSpace: "nowrap" }}>{s.email}</td>
 
+                      {/* Phone column for both tabs — enquiries store `phone`,
+                          feedback stores `phoneNo`. */}
+                      <td style={{ padding: "12px 16px", fontSize: 12, color: C.tm, whiteSpace: "nowrap" }}>
+                        {(isFeedback(s) ? s.phoneNo : s.phone)?.trim() || "-"}
+                      </td>
+
                       {isFeedback(s) && (
                         <>
-                          <td style={{ padding: "12px 16px", fontSize: 12, color: C.tm, whiteSpace: "nowrap" }}>{s.phoneNo}</td>
                           <td style={{ padding: "12px 16px", fontSize: 12, color: C.tm, whiteSpace: "nowrap" }}>{s.category}</td>
                           <td style={{ padding: "12px 16px", fontSize: 12, color: C.tm, whiteSpace: "nowrap" }}>
                             <span style={{ display: "inline-flex", gap: 1, alignItems: "center" }}>

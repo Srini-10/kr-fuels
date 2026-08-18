@@ -2,13 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 
 // CORS for the standalone API. Origins are echoed from env so credentials
 // (the `session` cookie) can flow from the admin & user front-ends.
+// ADMIN_ORIGIN / USER_ORIGIN each accept a comma-separated list, because the
+// public site is reachable on both the apex and the www host and the browser
+// sends whichever one the visitor actually landed on.
 const ALLOWED_ORIGINS = [
   process.env.ADMIN_ORIGIN,
   process.env.USER_ORIGIN,
   // dev defaults — user site :3000, admin panel :3001
   "http://localhost:3000",
   "http://localhost:3001",
-].filter(Boolean) as string[];
+]
+  .flatMap((v) => (v ? v.split(",") : []))
+  .map((v) => v.trim())
+  .filter(Boolean);
 
 function corsHeaders(origin: string | null): Record<string, string> {
   const allowOrigin =

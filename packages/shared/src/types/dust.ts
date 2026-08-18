@@ -90,6 +90,11 @@ export interface Enquiry {
     id?: string,
     name: string,
     email: string,
+    // Contact-form phone number. The website form requires it and the backend has
+    // always persisted it as `phone` (note: Feedback uses `phoneNo`) — it was just
+    // missing from this type, so the admin drawer/list never showed it. Optional
+    // so any legacy doc written without one still parses.
+    phone?: string,
     message: string,
     createdAt?: Date
 }

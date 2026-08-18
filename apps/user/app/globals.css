@@ -4,21 +4,34 @@
 @theme {
   /* ── PRIMARY BRAND — single reusable token (same value as the admin app).
      Edit --color-brand to recolor the whole site; all bg-brand/text-brand use it. */
-  --color-brand: #16a34a;        /* Tailwind green-600 — PRIMARY */
-  --color-brand-dark: #15803d;   /* green-700 (hover/active) */
-  --color-brand-light: #22c55e;  /* green-500 */
-  --color-brand-pale: #dcfce7;   /* green-100 tint */
-  --color-lime: #16a34a;         /* alias of brand for legacy classes */
+  --color-brand: #16a34a;
+  /* Tailwind green-600 — PRIMARY */
+  --color-brand-dark: #15803d;
+  /* green-700 (hover/active) */
+  --color-brand-light: #22c55e;
+  /* green-500 */
+  --color-brand-pale: #dcfce7;
+  /* green-100 tint */
+  --color-lime: #16a34a;
+  /* alias of brand for legacy classes */
   --color-lime-dark: #15803d;
-  --color-ink: #0d1a10;          /* near-black green text */
-  --color-dark: #0d1a10;         /* dark bars/buttons */
-  --color-cream: #f7f9f7;        /* muted background */
+  --color-ink: #0d1a10;
+  /* near-black green text */
+  --color-dark: #0d1a10;
+  /* dark bars/buttons */
+  --color-cream: #f7f9f7;
+  /* muted background */
   --color-muted: #f7f9f7;
-  --color-mutedfg: #52715a;      /* muted foreground */
-  --color-line: #e4ede7;         /* borders */
+  --color-mutedfg: #52715a;
+  /* muted foreground */
+  --color-line: #e4ede7;
+  /* borders */
   --color-accent: #f2f6f3;
 
   --radius-card: 1.25rem;
+
+  /* ── SHADOWS */
+  --shadow-card: 0 2px 18px rgba(13, 26, 16, 0.05);
 
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
@@ -60,21 +73,27 @@ a[aria-disabled="true"],
        4K density-lock below scales this whole layout up proportionally. */
     @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8;
   }
+
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-brand-dark;
   }
+
   .btn-dark {
     @apply inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-bold text-white transition hover:bg-black;
   }
+
   .btn-outline {
     @apply inline-flex items-center justify-center gap-2 rounded-full border border-line bg-white px-6 py-3.5 text-sm font-bold text-ink transition hover:bg-cream;
   }
+
   .eyebrow {
     @apply inline-flex items-center gap-2 rounded-full bg-brand-pale px-4 py-1.5 text-sm font-semibold text-brand-dark;
   }
+
   .card-soft {
-    @apply rounded-2xl border border-line bg-white p-6 shadow-[0_2px_18px_rgba(13,26,16,0.05)];
+    @apply rounded-2xl border border-line bg-white p-6 shadow-[var(--shadow-card)];
   }
+
   .section-title {
     @apply text-3xl font-extrabold tracking-tight text-ink sm:text-4xl;
   }
@@ -82,27 +101,53 @@ a[aria-disabled="true"],
 
 /* Scrolling price ticker (TopInfoBar) — content is duplicated, scroll -50% loops seamlessly. */
 @keyframes kr-marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
 }
+
 .kr-marquee {
   animation: kr-marquee 32s linear infinite;
 }
+
 .kr-marquee:hover {
   animation-play-state: paused;
 }
 
 /* Modal enter animations (framer-motion-free). */
 @keyframes kr-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
+
 @keyframes kr-pop-in {
-  from { opacity: 0; transform: translateY(10px) scale(0.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
-.kr-fade-in { animation: kr-fade-in 0.15s ease both; }
-.kr-pop-in { animation: kr-pop-in 0.2s cubic-bezier(0.16, 1, 0.32, 1) both; }
+
+.kr-fade-in {
+  animation: kr-fade-in 0.15s ease both;
+}
+
+.kr-pop-in {
+  animation: kr-pop-in 0.2s cubic-bezier(0.16, 1, 0.32, 1) both;
+}
 
 /* ──────────────────────────────────────────────────────────────
    Large-screen / 4K density lock
@@ -122,11 +167,54 @@ a[aria-disabled="true"],
 
    Each step keeps the effective layout width ≈ physical ÷ zoom ≈ 1440–1700px.
    ≤1535px is left fully untouched — the existing responsive layout applies. */
-@media (min-width: 1536px) { body { zoom: 1.07; } } /* eff ≈ 1440 */
-@media (min-width: 1700px) { body { zoom: 1.18; } }
-@media (min-width: 2048px) { body { zoom: 1.42; } }
-@media (min-width: 2304px) { body { zoom: 1.60; } }
-@media (min-width: 2560px) { body { zoom: 1.78; } } /* common 4K @150% scaling */
-@media (min-width: 2880px) { body { zoom: 2.00; } }
-@media (min-width: 3360px) { body { zoom: 2.33; } }
-@media (min-width: 3840px) { body { zoom: 2.67; } } /* native 4K @100% scaling */
+@media (min-width: 1536px) {
+  body {
+    zoom: 1.07;
+  }
+}
+
+/* eff ≈ 1440 */
+@media (min-width: 1700px) {
+  body {
+    zoom: 1.18;
+  }
+}
+
+@media (min-width: 2048px) {
+  body {
+    zoom: 1.42;
+  }
+}
+
+@media (min-width: 2304px) {
+  body {
+    zoom: 1.60;
+  }
+}
+
+@media (min-width: 2560px) {
+  body {
+    zoom: 1.78;
+  }
+}
+
+/* common 4K @150% scaling */
+@media (min-width: 2880px) {
+  body {
+    zoom: 2.00;
+  }
+}
+
+@media (min-width: 3360px) {
+  body {
+    zoom: 2.33;
+  }
+}
+
+@media (min-width: 3840px) {
+  body {
+    zoom: 2.67;
+  }
+}
+
+/* native 4K @100% scaling */

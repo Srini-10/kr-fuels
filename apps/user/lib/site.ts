@@ -3,14 +3,14 @@ import { PRODUCT_CATALOG } from "./products";
 
 export const BRAND = {
   name: "K.R Trans Fuels Private Limited",
-  shortName: "KR Trans Fuels",
+  shortName: "K.R Trans Fuels",
   email: "autolpg@krfuels.com",
   phone: "+91-9585586667",
   phone2: "+91-431-2730267",
   address: "No. 20, Lawson's Road, Cantonment, Tiruchirappalli-620001",
   hqCity: "Tiruchirappalli",
-  tagline: "Eco-Friendly Automotive Fuel — Since 2007",
-  heroTagline: "Switch to Auto LPG. Save 40%. Drive Cleaner.",
+  tagline: "Eco-friendly automotive fuel — since 2007",
+  heroTagline: "Switch to Auto LPG. Save 40%. Drive cleaner.",
   footerTagline: "Eco-friendly fuel. Proven savings.",
   coords: { lat: 10.80621, lng: 78.67951 },
   yearsOfService: new Date().getFullYear() - 2007,
@@ -32,6 +32,10 @@ export const ADMIN_URL = (process.env.NEXT_PUBLIC_ADMIN_URL ?? "http://localhost
 // Where the public "Staff Login" links actually point.
 export const ADMIN_LOGIN_URL = `https://webmail.krfuels.com/interface/root`;
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+// Sister brand — the "Switch to VIBUH" button in the header top bar sends visitors
+// to the VIBUH site (same destination the Conversion Kits / Tanks menu items use).
+export const VIBUH_URL = "https://www.vibuh.com";
 
 // The admin writes the contact address as an OBJECT ({ street, city, state, pincode }),
 // but the header/footer/contact page render it as a single line. Normalize either an
@@ -66,9 +70,9 @@ export const NAV_LINKS = [
   { label: "Contact", href: "/contact" },
 ];
 
-// Products dropdown / footer menu — Auto LPG & Lubricants open internal screens;
-// Conversion Kits & Tanks link out to the manufacturer site (external). Derived
-// from the single-source product catalog.
+// Products dropdown / footer menu — Auto LPG opens an internal screen; Conversion
+// Kits & Tanks link out to the manufacturer site (external). Derived from the
+// single-source product catalog (Lubricants retired — see lib/products.ts).
 export const PRODUCT_MENU = PRODUCT_CATALOG.map((p) => ({
   label: p.label,
   href: p.href,
@@ -78,17 +82,18 @@ export const PRODUCT_MENU = PRODUCT_CATALOG.map((p) => ({
 // Shown when the backend has no testimonials yet (matches the Lovable reference,
 // with the real customer photos downloaded into /public/assets/testimonials).
 export const TESTIMONIAL_FALLBACK = [
-  { id: "t1", name: "Mr. Thomas Christy Louis", designation: "Customer", company: "", rating: 5, image: "/assets/testimonials/louis.jpg", message: "Switching to Auto LPG with KR Fuels was the best decision. Real savings every month and the staff is friendly." },
-  { id: "t2", name: "Mr. R. Jegan", designation: "MD of Megala Travels", company: "", rating: 5, image: "/assets/testimonials/jagan.jpg", message: "Our entire fleet runs on Auto LPG from KR Fuels. Reliability and savings — the formula simply works." },
-  { id: "t3", name: "Mr. T. Murugesan", designation: "Idea Cellular Limited", company: "", rating: 5, image: "/assets/testimonials/murugesan.jpg", message: "Clean stations, transparent pricing, and friendly service. KR Fuels has set a benchmark in Tamil Nadu." },
-  { id: "t4", name: "Mr. Kannan", designation: "Proprietor, Meena Auto Mech", company: "", rating: 5, image: "/assets/testimonials/meena.jpg", message: "Conversion was smooth, support has been excellent. I recommend Auto LPG to every customer." },
-  { id: "t5", name: "Mr. A. Balaji", designation: "MD of Mint Caterings", company: "", rating: 5, image: "/assets/testimonials/balaji.jpg", message: "We saved nearly 40% on fuel costs. The KR Fuels network covers everywhere we drive." },
+  { id: "t1", name: "Mr. Thomas christy louis", designation: "Customer", company: "", rating: 5, image: "/assets/testimonials/louis.jpg", message: "Switching to Auto LPG with kr fuels was the best decision. Real savings every month and the staff is friendly." },
+  { id: "t2", name: "Mr. R. Jegan", designation: "Md of megala travels", company: "", rating: 5, image: "/assets/testimonials/jagan.jpg", message: "Our entire fleet runs on Auto LPG from kr fuels. Reliability and savings — the formula simply works." },
+  { id: "t3", name: "Mr. T. Murugesan", designation: "Idea cellular limited", company: "", rating: 5, image: "/assets/testimonials/murugesan.jpg", message: "Clean stations, Transparent pricing, And friendly service. Kr fuels has set a benchmark in tamil nadu." },
+  { id: "t4", name: "Mr. Kannan", designation: "Proprietor, Meena auto mech", company: "", rating: 5, image: "/assets/testimonials/meena.jpg", message: "Conversion was smooth, Support has been excellent. I recommend Auto LPG to every customer." },
+  { id: "t5", name: "Mr. A. Balaji", designation: "Md of mint caterings", company: "", rating: 5, image: "/assets/testimonials/balaji.jpg", message: "We saved nearly 40% on fuel costs. The kr fuels network covers everywhere we drive." },
 ];
 
 // Offerings shown on Home + Products fallback.
 export const OFFERINGS = [
-  { emoji: "⛽", title: "Auto LPG Fuel", desc: "Clean, affordable fuel at every station." },
-  { emoji: "🔧", title: "Conversion Kits", desc: "BIS-certified Venturi & Sequential kits." },
-  { emoji: "🛡️", title: "Tanks & Multivalves", desc: "Safe, certified storage solutions." },
-  { emoji: "🛢️", title: "Lubricants", desc: "Engine lubricants for LPG vehicles." },
+  { emoji: "⛽", title: "Auto LPG Fuel", desc: "Clean, Affordable fuel at every station." },
+  { emoji: "🔧", title: "Conversion Kits", desc: "Bis-certified venturi & sequential kits." },
+  { emoji: "🛡️", title: "Tanks & Multivalves", desc: "Safe, Certified storage solutions." },
+  // Lubricants retired (client request) — see lib/products.ts.
+  // { emoji: "🛢️", title: "Lubricants", desc: "Engine lubricants for lpg vehicles." },
 ];

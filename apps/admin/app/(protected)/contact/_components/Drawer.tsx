@@ -21,9 +21,6 @@ type DrawerProps = {
 
 const isFeedbackItem = (item: ListItem): item is Feedback => "rating" in item
 
-const truncate = (text: string, len = 60) =>
-    text?.length > len ? text.slice(0, len) + "..." : text;
-
 const DetailRow = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) => (
     <div style={{
         display: "flex",
@@ -80,6 +77,8 @@ export const Drawer = ({ item, tab, onClose, resolving, deleting, resolve, remov
     if (!mounted || !item) return null
 
     const isFb = isFeedbackItem(item)
+    // Enquiries persist `phone`, feedback persists `phoneNo` — normalise to one value.
+    const phone = (isFb ? item.phoneNo : item.phone)?.trim()
 
     return (
         <>
@@ -160,11 +159,24 @@ export const Drawer = ({ item, tab, onClose, resolving, deleting, resolve, remov
                         }
                     />
 
+                    {/* Phone: form submissions store it as `phone`, feedback as `phoneNo`.
+                        Shown for BOTH tabs — previously this row lived inside the
+                        feedback-only block, so contact-form phone numbers were
+                        collected and saved but never displayed anywhere in the admin. */}
+                    {phone && (
+                        <DetailRow
+                            icon={<Phone size={14} />}
+                            label="Phone Number"
+                            value={
+                                <Link href={`tel:${phone}`} style={{ color: C.p, textDecoration: "none" }}>
+                                    {phone}
+                                </Link>
+                            }
+                        />
+                    )}
+
                     {tab === "feedback" && isFb && (
                         <>
-                            {(item ).phoneNo && (
-                                <DetailRow icon={<Phone size={14} />} label="Phone Number" value={(item ).phoneNo} />
-                            )}
                             {(item).category && (
                                 <DetailRow icon={<Tag size={14} />} label="Category" value={(item ).category} />
                             )}
@@ -193,10 +205,18 @@ export const Drawer = ({ item, tab, onClose, resolving, deleting, resolve, remov
                         </>
                     )}
 
+                    {/* Full message — this drawer IS the detail view, so it must never
+                        truncate (it used to cut off at 60 chars, hiding the rest of
+                        every long enquiry). The list keeps its one-line preview; the
+                        body scrolls if the text is long. */}
                     <DetailRow
                         icon={<MessageSquare size={14} />}
                         label="Message"
-                        value={<span style={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}>{truncate(item.message)}</span>}
+                        value={
+                            <span style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", lineHeight: 1.7 }}>
+                                {item.message}
+                            </span>
+                        }
                     />
                     <DetailRow icon={<Calendar size={14} />} label="Submitted" value={fmtDate(item.createdAt)} />
                 </div>

@@ -77,9 +77,10 @@ const EMPTY_PRODUCT_FIELDS = {
 };
 
 export const PRODUCTS_FALLBACK: ProductPublic[] = [
-  { ...EMPTY_PRODUCT_FIELDS, id: "fb-p1", slug: "auto-lpg", product_name: "Auto LPG Fuel", product_category: "Fuel", description: "Clean-burning, economical Auto LPG dispensed at every KR Trans Fuels station — save up to 40% over petrol.", product_image: "", gallery_images: [], external_url: "" },
-  { ...EMPTY_PRODUCT_FIELDS, id: "fb-p2", slug: "conversionkit", product_name: "Conversion Kits", product_category: "Equipment", description: "BIS-certified Venturi & Sequential conversion kits for petrol vehicles, fitted by trained technicians.", product_image: "", gallery_images: [], external_url: "", is_external: true },
-  { ...EMPTY_PRODUCT_FIELDS, id: "fb-p3", slug: "lubricants", product_name: "Lubricants", product_category: "Accessories", description: "Specialised engine lubricants formulated for Auto LPG vehicles for longer engine life.", product_image: "", gallery_images: [], external_url: "" },
+  { ...EMPTY_PRODUCT_FIELDS, id: "fb-p1", slug: "auto-lpg", product_name: "Auto LPG Fuel", product_category: "Fuel", description: "Clean-burning, Economical Auto LPG dispensed at every kr trans fuels station — save up to 40% over petrol.", product_image: "", gallery_images: [], external_url: "" },
+  { ...EMPTY_PRODUCT_FIELDS, id: "fb-p2", slug: "conversionkit", product_name: "Conversion Kits", product_category: "Equipment", description: "Bis-certified venturi & sequential conversion kits for petrol vehicles, Fitted by trained technicians.", product_image: "", gallery_images: [], external_url: "", is_external: true },
+  // Lubricants retired (client request) — see lib/products.ts.
+  // { ...EMPTY_PRODUCT_FIELDS, id: "fb-p3", slug: "lubricants", product_name: "Lubricants", product_category: "Accessories", description: "Specialised engine lubricants formulated for Auto LPG vehicles for longer engine life.", product_image: "", gallery_images: [], external_url: "" },
   { ...EMPTY_PRODUCT_FIELDS, id: "fb-p4", slug: "tanks", product_name: "Tanks & Multivalves", product_category: "Equipment", description: "Safety-certified high-pressure tanks and multivalves built to automotive standards.", product_image: "", gallery_images: [], external_url: "", is_external: true },
 ];
 
@@ -87,45 +88,45 @@ export const PRODUCTS_FALLBACK: ProductPublic[] = [
 // Guide page shows the real questions even before the admin `faqKrfuels` collection
 // is seeded. Real entries managed in the admin override these.
 export const FAQ_FALLBACK: FaqPublic[] = [
-  { id: "fb-f1", question: "What is LPG?", answer: "Liquefied Petroleum Gas." },
-  { id: "fb-f2", question: "What are the uses of LPG?", answer: "LPG is used for cooking, as automobile fuel, in industries and for agricultural purpose." },
+  { id: "fb-f1", question: "What is lpg?", answer: "Liquefied petroleum gas." },
+  { id: "fb-f2", question: "What are the uses of lpg?", answer: "Lpg is used for cooking, As automobile fuel, In industries and for agricultural purpose." },
   {
     id: "fb-f3",
-    question: "What is the difference between Domestic LPG and Automotive LPG?",
+    question: "What is the difference between domestic lpg and automotive lpg?",
     answer:
-      "Auto LPG vs Domestic LPG:\n" +
-      "• Grade: BIS 14861 (Auto LPG) vs BIS 4576 (Domestic LPG)\n" +
-      "• Composition: Propane and Butane only (Auto LPG) vs Contains impurities also (Domestic LPG)\n" +
-      "• Motor Octane Number (MON): 93+ (Auto LPG) vs 60+ (Domestic LPG)\n" +
-      "• Sale: Sold through retail outlets approved by PESO (Petroleum and Explosives Safety Organization) (Auto LPG) vs Transferring from a domestic cylinder to a car/auto tank is illegal and punishable (Domestic LPG)\n" +
-      "• Safety: Very safe (Auto LPG) vs Crude and unsafe method (Domestic LPG)",
+      "Auto LPG vs domestic lpg:\n" +
+      "• Grade: bis 14861 (Auto LPG) vs bis 4576 (domestic lpg)\n" +
+      "• Composition: propane and butane only (Auto LPG) vs contains impurities also (domestic lpg)\n" +
+      "• Motor octane number (mon): 93+ (Auto LPG) vs 60+ (domestic lpg)\n" +
+      "• Sale: sold through retail outlets approved by peso (petroleum and explosives safety organization) (Auto LPG) vs transferring from a domestic cylinder to a car/auto tank is illegal and punishable (domestic lpg)\n" +
+      "• Safety: very safe (Auto LPG) vs crude and unsafe method (domestic lpg)",
   },
   {
     id: "fb-f4",
-    question: "How safe is LPG as an automotive fuel?",
+    question: "How safe is lpg as an automotive fuel?",
     answer:
-      "Over 24 million vehicles consume 64 million tons of LPG worldwide through more than 3 lakh distributing points. There are more than 1500 LPG stations PAN India and 220 LPG stations across Tamil Nadu.\n\n" +
-      "Some highly prominent people own them — for example, the President of the United States' limousine and the Queen's Rolls Royce in the UK.\n\n" +
-      "LPG has exemplary safety records. LPG storage tanks are extremely robust (20 times more puncture resistant than petrol tanks), capable of withstanding huge impacts and collisions, and are certified by PESO. It has the lowest flammability range and a higher ignition temperature than petrol and diesel.",
+      "Over 24 million vehicles consume 64 million tons of lpg worldwide through more than 3 lakh distributing points. There are more than 1500 lpg stations pan india and 220 lpg stations across tamil nadu.\n\n" +
+      "Some highly prominent people own them — for example, The president of the united states' limousine and the queen's rolls royce in the uk.\n\n" +
+      "Lpg has exemplary safety records. Lpg storage tanks are extremely robust (20 times more puncture resistant than petrol tanks), Capable of withstanding huge impacts and collisions, And are certified by peso. It has the lowest flammability range and a higher ignition temperature than petrol and diesel.",
   },
   {
     id: "fb-f5",
     question: "How to identify the right and genuine conversion kit?",
     answer:
-      "Always have your car fitted with a genuine LPG conversion kit from authorized retrofitters. Check the genuine nature of the approval certificate issued by the competent authorities like ICAT, ARAI, PESO and STA.",
+      "Always have your car fitted with a genuine lpg conversion kit from authorized retrofitters. Check the genuine nature of the approval certificate issued by the competent authorities like icat, Arai, Peso and sta.",
   },
   {
     id: "fb-f6",
-    question: "Can I transfer LPG from a domestic cylinder or commercial cylinder into the LPG tank in my vehicle?",
+    question: "Can i transfer lpg from a domestic cylinder or commercial cylinder into the lpg tank in my vehicle?",
     answer:
-      "No, absolutely not. It is both illegal and highly unsafe. There is no approved mechanism or equipment to transfer LPG from cylinders to a tank.\n\n" +
-      "Moreover, the BIS of LPG used for cooking is BIS 4576 and the BIS of LPG used as automotive fuel is 14861.\n\n" +
-      "Using domestic LPG as automotive fuel will cause damage to the engine and conversion kit, and this will affect the performance of the vehicle.",
+      "No, Absolutely not. It is both illegal and highly unsafe. There is no approved mechanism or equipment to transfer lpg from cylinders to a tank.\n\n" +
+      "Moreover, The bis of lpg used for cooking is bis 4576 and the bis of lpg used as automotive fuel is 14861.\n\n" +
+      "Using domestic lpg as automotive fuel will cause damage to the engine and conversion kit, And this will affect the performance of the vehicle.",
   },
   {
     id: "fb-f7",
-    question: "What happens if an LPG converted vehicle is involved in an accident?",
+    question: "What happens if an lpg converted vehicle is involved in an accident?",
     answer:
-      "Authorized LPG tanks and kits are equipped with numerous safety devices and have been crash tested to prove that in the instance of a severe impact, they will deform and not puncture.",
+      "Authorized lpg tanks and kits are equipped with numerous safety devices and have been crash tested to prove that in the instance of a severe impact, They will deform and not puncture.",
   },
 ];

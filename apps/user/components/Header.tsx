@@ -4,8 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { Menu, X, Calculator, Leaf, ChevronDown, ArrowUpRight, CalendarDays, Fuel, Shield } from "lucide-react";
-import { NAV_LINKS, PRODUCT_MENU, ADMIN_LOGIN_URL, STATION_COUNT_FALLBACK, fmtCount } from "@/lib/site";
+import { Menu, X, Calculator, Leaf, ChevronDown, ArrowUpRight, CalendarDays, Fuel } from "lucide-react";
+import { NAV_LINKS, PRODUCT_MENU, ADMIN_LOGIN_URL, VIBUH_URL, STATION_COUNT_FALLBACK, fmtCount } from "@/lib/site";
 import type { FuelPricesPublic } from "@/lib/api";
 import type { CalculatorSettings } from "@kr/shared/types";
 
@@ -54,11 +54,13 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-50 w-full">
-      {/* ── Top green price bar — Auto-LPG is the hero; Petrol/Diesel sit beside it as comparison. */}
+      {/* ── Top green price bar — Auto-LPG is the hero; Petrol/Diesel sit beside it as comparison.
+          On mobile the bar wraps into two rows (date + Staff Login on top, prices below);
+          order utilities keep the desktop single-row layout (date · prices · login) intact. */}
       <div className="bg-brand text-white">
-        <div className="container-x flex items-center justify-between gap-4 py-2.5">
-          {/* Left: today + city context (md+) */}
-          <div className="hidden min-w-0 flex-col md:flex">
+        <div className="container-x flex flex-wrap items-center gap-x-4 gap-y-2 py-2.5 md:flex-nowrap">
+          {/* Left: today + city context */}
+          <div className="order-1 flex min-w-0 flex-col">
             <span className="text-[12px] font-bold text-white/85">Today · {hqCity}</span>
             <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-white/70">
               <CalendarDays size={12} className="text-white/80" />
@@ -66,22 +68,25 @@ export function Header({
             </span>
           </div>
 
-          {/* Center: prices — Auto-LPG hero card + Petrol/Diesel comparison */}
-          <div className="flex min-w-0 flex-1 items-center justify-center gap-4 sm:gap-6">
-            <div className="flex items-center gap-2.5 rounded-2xl bg-white/15 px-3.5 py-1.5 ring-1 ring-white/20">
+          {/* Center: prices — Auto-LPG hero card + Petrol/Diesel comparison.
+              All three stay visible on mobile; gaps/sizes tighten and the per-litre suffix
+              is dropped below sm so the row fits a ~360px screen. Drops to its own full-width
+              row on mobile (order-3) and sits in the middle on md+ (order-2). */}
+          <div className="order-3 flex w-full min-w-0 items-center justify-center gap-3 sm:gap-6 md:order-2 md:w-auto md:flex-1">
+            <div className="flex shrink-0 items-center gap-2 rounded-2xl bg-white/15 px-3 py-1.5 ring-1 ring-white/20 sm:gap-2.5 sm:px-3.5">
               <Fuel size={20} className="shrink-0 text-white/90" />
               <div className="leading-none">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-white/80">Auto-LPG</div>
-                <div className="mt-1 text-[22px] font-extrabold tracking-tight">
+                <div className="mt-1 text-lg font-extrabold tracking-tight sm:text-[22px]">
                   ₹{p(prices.autoLPG)}<span className="ml-0.5 text-[11px] font-semibold text-white/70">/litre</span>
                 </div>
               </div>
             </div>
-            <div className="hidden items-center gap-5 sm:flex">
+            <div className="flex items-center gap-3 sm:gap-5">
               {[{ l: "Petrol", v: prices.petrol }, { l: "Diesel", v: prices.diesel }].map((f) => (
                 <div key={f.l} className="leading-none">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-white/60">{f.l}</div>
-                  <div className="mt-1 text-lg font-bold text-yellow-400">
+                  <div className="mt-1 text-base font-bold text-yellow-400 sm:text-lg">
                     ₹{p(f.v)}<span className="ml-0.5 text-[11px] font-medium text-white/50">/lit</span>
                   </div>
                 </div>
@@ -89,18 +94,25 @@ export function Header({
             </div>
           </div>
 
-          {/* Right: privacy + staff login (md+) */}
-          <div className="hidden shrink-0 items-center justify-end gap-2.5 md:flex">
-            {/* <div className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
-              <Leaf size={14} className="text-brand" />
-              <span className="text-[13px] font-extrabold leading-none text-brand">Save {savingsPct}%</span>
-              <span className="hidden text-[10px] font-semibold leading-none text-brand/75 lg:inline">vs petrol</span>
-            </div> */}
-            {/* <span className="h-3.5 w-px bg-white/25" aria-hidden /> */}
-            <Link href={ADMIN_LOGIN_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[12px] font-bold text-white transition hover:bg-white/25">
-              Staff Login <ArrowUpRight size={13} />
+          {/* Right: "Switch to VIBUH" — shares the top row with the date on mobile
+              (order-2, pushed right via ml-auto); sits at the far right on md+ (order-3).
+              White pill so it stays clearly visible against the green bar. */}
+          <div className="order-2 ml-auto flex shrink-0 items-center justify-end gap-2.5 md:order-3 md:ml-0">
+            <Link
+              href={VIBUH_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Switch to VIBUH"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-[12px] font-extrabold text-brand shadow-sm ring-1 ring-white/60 transition hover:bg-cream hover:text-brand-dark"
+            >
+              Switch to VIBUH <ArrowUpRight size={14} strokeWidth={2.5} />
             </Link>
           </div>
+
+          {/* Staff login (kept for reference — currently hidden). */}
+          {/* <Link href={ADMIN_LOGIN_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[12px] font-bold text-white transition hover:bg-white/25">
+            Staff Login <ArrowUpRight size={13} />
+          </Link> */}
         </div>
       </div>
 
@@ -197,12 +209,10 @@ export function Header({
                   </Link>
                 );
               })}
-              <Link href="/privacy" onClick={() => setOpen(false)} className={`flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold ${pathname === "/privacy" ? "bg-brand-pale text-brand" : "text-ink/80 hover:bg-brand-pale"}`}>
-                <Shield size={15} /> Privacy Policy
-              </Link>
+              {/* Menu mirrors the desktop navbar: nav links + the two calculator actions.
+                  Staff Login lives in the top bar (visible on mobile), so it's not repeated here. */}
               <button onClick={() => { setSavingsOpen(true); setOpen(false); }} className="mt-1 btn-dark justify-center">Savings Calculator</button>
               <button onClick={() => { setCarbonOpen(true); setOpen(false); }} className="btn-outline justify-center">Carbon Footprint</button>
-              <Link href={ADMIN_LOGIN_URL} target="_blank" rel="noopener noreferrer" className="btn-outline justify-center">Admin Login</Link>
             </div>
           </div>
         )}

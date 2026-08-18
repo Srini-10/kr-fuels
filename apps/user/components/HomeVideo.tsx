@@ -9,7 +9,7 @@ function isEmbedUrl(url: string): boolean {
   return /youtube\.com|youtu\.be|vimeo\.com|\/embed\//i.test(url);
 }
 
-export function HomeVideo({ src, title = "KR GFI Premium Auto LPG" }: { src: string; title?: string }) {
+export function HomeVideo({ src }: { src: string; }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
 
@@ -21,7 +21,7 @@ export function HomeVideo({ src, title = "KR GFI Premium Auto LPG" }: { src: str
   if (isEmbedUrl(src)) {
     return (
       <div className={frame}>
-        <iframe className="h-full w-full" src={src} title={title} allowFullScreen loading="lazy" />
+        <iframe className="h-full w-full" src={src} allowFullScreen loading="lazy" />
       </div>
     );
   }
@@ -29,7 +29,7 @@ export function HomeVideo({ src, title = "KR GFI Premium Auto LPG" }: { src: str
   const start = () => {
     setPlaying(true);
     // Defer so the element is interactive before we ask it to play.
-    requestAnimationFrame(() => videoRef.current?.play().catch(() => {}));
+    requestAnimationFrame(() => videoRef.current?.play().catch(() => { }));
   };
 
   return (
@@ -37,7 +37,6 @@ export function HomeVideo({ src, title = "KR GFI Premium Auto LPG" }: { src: str
       <video
         ref={videoRef}
         src={src}
-        title={title}
         controls={playing}
         playsInline
         preload="metadata"

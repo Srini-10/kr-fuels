@@ -60,7 +60,7 @@ export default async function HomePage() {
   ];
 
   const ctaCards = [
-    { icon: MapPin, title: "Find a Station", sub: `${fmtCount(count)} locations near you`, href: "/stations" },
+    { icon: MapPin, title: "Find a station", sub: `${fmtCount(count)} locations near you`, href: "/stations" },
     { icon: GitCompare, title: "LPG vs Domestic LPG", sub: "Know the real difference", href: "/guide" },
     { icon: MessageSquare, title: "Feedback", sub: "Share your experience", href: "/contact" },
     { icon: HelpCircle, title: "FAQ", sub: "Common questions answered", href: "/guide#faq" },
@@ -72,7 +72,7 @@ export default async function HomePage() {
       <section className="bg-gradient-to-b from-brand-pale/60 to-white">
         <div className="container-x grid items-center gap-12 py-14 lg:grid-cols-2 lg:py-20">
           <div>
-            <span className="eyebrow mb-6">🌿 Eco-Friendly Automotive Fuel — Since 2007</span>
+            <span className="eyebrow mb-6">🌿 Eco-friendly automotive fuel — since 2007</span>
             <h1 className="text-[44px] font-extrabold leading-[1.04] tracking-tight text-ink sm:text-6xl lg:text-[68px]">
               Switch to Auto LPG. Save {savingsPct}%. <span className="text-brand">Drive Cleaner.</span>
             </h1>
@@ -80,7 +80,7 @@ export default async function HomePage() {
               Tamil Nadu&apos;s largest Auto LPG network. {fmtCount(count)} stations. Cleaner fuel. Real savings every day.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/stations" className="btn-primary">Find Nearest Station <ArrowRight size={16} /></Link>
+              <Link href="/contact" className="btn-primary">Contact Us <ArrowRight size={16} /></Link>
               <Link href="/guide" className="btn-dark">How It Works <ArrowRight size={16} /></Link>
             </div>
           </div>
@@ -88,15 +88,31 @@ export default async function HomePage() {
           {/* Hero carousel + floating badges */}
           <div className="relative mx-auto w-full max-w-xl">
             <HeroCarousel images={heroSlides} alt="KR Trans Fuels Auto LPG station" />
-            <div className="absolute -right-3 top-6 rounded-2xl border border-line bg-white px-4 py-3 shadow-lg">
+            <div className="absolute -right-3 top-6 hidden rounded-2xl border border-line bg-white px-4 py-3 shadow-lg sm:block">
               <div className="text-[10px] font-semibold uppercase tracking-wider text-mutedfg">Trusted</div>
               <div className="text-sm font-extrabold text-ink">Since 2007</div>
             </div>
-            <div className="absolute -left-3 bottom-16 rounded-2xl border border-line bg-white px-4 py-3 shadow-lg">
+            <div className="absolute -left-3 bottom-16 hidden rounded-2xl border border-line bg-white px-4 py-3 shadow-lg sm:block">
               <div className="text-[10px] font-semibold uppercase tracking-wider text-mutedfg">Network</div>
               <div className="text-sm font-extrabold text-ink">{fmtCount(count)} Stations</div>
             </div>
-            <div className="absolute -right-3 bottom-6 rounded-2xl border border-line bg-white px-4 py-3 shadow-lg">
+            <div className="absolute -right-3 bottom-6 hidden rounded-2xl border border-line bg-white px-4 py-3 shadow-lg sm:block">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-mutedfg">Save</div>
+              <div className="text-sm font-extrabold text-brand">{savingsPct}% Savings</div>
+            </div>
+          </div>
+
+          {/* Mobile-only: badges as a single-row grid under the image */}
+          <div className="grid grid-cols-3 gap-2 sm:hidden">
+            <div className="rounded-2xl border border-line bg-white px-3 py-3 text-center shadow-lg">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-mutedfg">Trusted</div>
+              <div className="text-sm font-extrabold text-ink">Since 2007</div>
+            </div>
+            <div className="rounded-2xl border border-line bg-white px-3 py-3 text-center shadow-lg">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-mutedfg">Network</div>
+              <div className="text-sm font-extrabold text-ink">{fmtCount(count)} Stations</div>
+            </div>
+            <div className="rounded-2xl border border-line bg-white px-3 py-3 text-center shadow-lg">
               <div className="text-[10px] font-semibold uppercase tracking-wider text-mutedfg">Save</div>
               <div className="text-sm font-extrabold text-brand">{savingsPct}% Savings</div>
             </div>
@@ -127,7 +143,7 @@ export default async function HomePage() {
       <section className="container-x py-14">
         <div className="mb-8 text-center">
           <span className="eyebrow mb-3">Quick Links</span>
-          <h2 className="section-title">Everything You Need, One Tap Away</h2>
+          <h2 className="section-title">Everything you need, One tap away</h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {ctaCards.map((c) => (
@@ -167,13 +183,13 @@ export default async function HomePage() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
             <span className="eyebrow mb-4">About Us</span>
-            <h2 className="section-title">Powering Green Mobility Since 2007</h2>
+            <h2 className="section-title">Powering green mobility since 2007</h2>
             <p className="mt-4 text-mutedfg">
               {about.contentBlocks?.[0]?.body ||
-                `K.R Trans Fuels, a subsidiary of KRT Carriers, established its first Auto LPG Dispensing Station in 2007. Today, with ${fmtCount(count)} stations across Tamil Nadu and more in the pipeline, we lead the state in cleaner automotive fuel.`}
+                `K.R Trans Fuels, a subsidiary of KRT Carriers, established its first Auto LPG dispensing station in 2007. Today, with ${fmtCount(count)} stations across Tamil Nadu and more in the pipeline, we lead the state in cleaner automotive fuel.`}
             </p>
             <Link href="/about" className="mt-6 inline-flex items-center gap-1.5 font-bold text-brand hover:gap-2.5 transition-all">
-              Learn More About Us <ArrowRight size={16} />
+              Learn more about us <ArrowRight size={16} />
             </Link>
             <div className="mt-7 grid grid-cols-2 gap-4">
               <div className="rounded-2xl bg-brand-pale p-5">
@@ -182,7 +198,7 @@ export default async function HomePage() {
               </div>
               <div className="rounded-2xl bg-brand-pale p-5">
                 <div className="text-3xl font-extrabold text-brand">{savingsPct}%</div>
-                <div className="text-sm text-mutedfg">Savings over Petrol</div>
+                <div className="text-sm text-mutedfg">Savings over petrol</div>
               </div>
             </div>
           </div>
@@ -204,7 +220,7 @@ export default async function HomePage() {
       <section className="container-x py-20">
         <div className="mb-10 text-center">
           <span className="eyebrow mb-4">Testimonials</span>
-          <h2 className="section-title">Trusted by Thousands</h2>
+          <h2 className="section-title">Trusted by thousands</h2>
           <p className="mt-2 text-mutedfg">Hear from our customers across Tamil Nadu</p>
         </div>
         <TestimonialsCarousel items={carousel} />
@@ -237,12 +253,12 @@ export default async function HomePage() {
       <section className="container-x py-20">
         <div className="overflow-hidden rounded-[32px] bg-ink px-8 py-16 text-center text-white">
           <ShieldCheck className="mx-auto mb-4 text-brand-light" size={36} />
-          <h2 className="text-3xl font-extrabold sm:text-4xl">Ready to Switch to Smarter Fuel?</h2>
+          <h2 className="text-3xl font-extrabold sm:text-4xl">Ready to switch to smarter fuel?</h2>
           <p className="mx-auto mt-3 max-w-xl text-white/70">
             Join thousands of drivers saving {savingsPct}% on fuel costs with cleaner, greener Auto LPG.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/stations" className="btn-primary">Find a Station Near You <ArrowRight size={16} /></Link>
+            <Link href="/stations" className="btn-primary">Find a station near you <ArrowRight size={16} /></Link>
             <Link href="/contact" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/30 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/10">
               Talk to Our Team
             </Link>

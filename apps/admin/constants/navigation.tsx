@@ -18,9 +18,9 @@ import {
 export const NAV = [
   { id: "dashboard",      label: "Dashboard",      href: "/dashboard",      icon: LayoutDashboard },
   { id: "hero-images",    label: "Hero Carousel",  href: "/hero-images",    icon: Images },
-  { id: "clients",        label: "Partners",       href: "/clients",        icon: Users },
+  // { id: "clients",        label: "Partners",       href: "/clients",        icon: Users },
   { id: "stations",       label: "Stations",       href: "/stations",       icon: MapPin },
-  { id: "products",       label: "Products",       href: "/products",       icon: Package },
+  // { id: "products",       label: "Products",       href: "/products",       icon: Package },
   { id: "testimonials",   label: "Testimonials",   href: "/testimonials",   icon: Star },
   { id: "faq",            label: "FAQ",            href: "/faq",            icon: HelpCircle },
   { id: "about",          label: "About Us",       href: "/about",          icon: Info },

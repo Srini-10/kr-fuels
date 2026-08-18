@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -37,6 +37,30 @@ async function createSession(idToken: string) {
     }
 }
 
+// Marks that this tab already tried to rebuild the session cookie from an
+// existing Firebase sign-in. If we come straight back to /login after that, the
+// cookie isn't sticking, so we stop instead of bouncing forever (see below).
+const RECOVERY_KEY = "kr-admin-session-recovery";
+const RECOVERY_WINDOW_MS = 30_000;
+
+function recentlyRecovered(): boolean {
+    try {
+        const at = Number(sessionStorage.getItem(RECOVERY_KEY) ?? 0);
+        return at > 0 && Date.now() - at < RECOVERY_WINDOW_MS;
+    } catch {
+        return false; // storage disabled — just let the attempt through
+    }
+}
+
+function markRecovery(on: boolean) {
+    try {
+        if (on) sessionStorage.setItem(RECOVERY_KEY, String(Date.now()));
+        else sessionStorage.removeItem(RECOVERY_KEY);
+    } catch {
+        /* storage disabled — best effort */
+    }
+}
+
 function CenteredSpinner() {
     return (
         <div className="flex items-center justify-center py-10">
@@ -57,14 +81,69 @@ function LoginForm() {
     const [remember, setRemember] = useState(true);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    // Set when we give up on an existing Firebase sign-in. It forces the form to
+    // render even if signOut() couldn't clear `user` (e.g. offline), so a failure
+    // can never leave the screen stuck on the spinner.
+    const [showFormAnyway, setShowFormAnyway] = useState(false);
 
-    // Already authenticated → go straight to the intended destination.
-    // Gate on !loading so an in-flight sign-in finishes createSession() (which
-    // sets the session cookie) before we navigate; otherwise onAuthStateChanged
-    // could fire first and the middleware would bounce us back for lack of a cookie.
+    // Already authenticated → rebuild the session cookie, then go to the intended
+    // destination.
+    //
+    // Firebase keeps the sign-in in IndexedDB indefinitely, but the session cookie
+    // the proxy checks expires after 14 days (and browsers/users clear cookies
+    // independently). A returning admin therefore lands here signed in with NO
+    // cookie — and simply navigating would make proxy.ts bounce us back to /login,
+    // where this effect fires again: an endless redirect loop showing nothing but
+    // the spinner. (Incognito has no persisted sign-in, so the form appears
+    // normally — exactly the reported behaviour.) Minting a fresh cookie from the
+    // current Firebase user breaks the loop and signs the admin straight back in.
+    //
+    // Gate on !loading so an in-flight manual sign-in owns the navigation itself.
+    const redirecting = useRef(false);
     useEffect(() => {
-        if (!authLoading && !loading && user) router.replace(next);
+        if (authLoading || loading || !user || redirecting.current) return;
+        redirecting.current = true;
+
+        let cancelled = false;
+        (async () => {
+            // Came back here right after a recovery attempt → the cookie was
+            // rejected (blocked third-party/`secure` cookie, clock skew, …).
+            // Sign out so the form is usable instead of looping.
+            if (recentlyRecovered()) {
+                markRecovery(false);
+                try { await signOut(auth); } catch { /* ignore */ }
+                if (cancelled) return;
+                redirecting.current = false;
+                setShowFormAnyway(true);
+                setError("Your session expired and could not be restored. Please sign in again.");
+                return;
+            }
+
+            try {
+                markRecovery(true);
+                const idToken = await user.getIdToken();
+                await createSession(idToken);
+                if (!cancelled) router.replace(next);
+            } catch (err: any) {
+                // Token refresh or session creation failed (revoked account,
+                // offline, backend down). Clear the half-state and show why.
+                markRecovery(false);
+                try { await signOut(auth); } catch { /* ignore */ }
+                if (cancelled) return;
+                redirecting.current = false;
+                setShowFormAnyway(true);
+                setError(getFriendlyError(err?.code ?? err?.message));
+            }
+        })();
+
+        return () => { cancelled = true; };
     }, [authLoading, loading, user, next, router]);
+
+    // Reaching a clean login screen (no Firebase user) resets the recovery guard,
+    // so a later expired-cookie visit gets its own attempt.
+    useEffect(() => {
+        if (!authLoading && !user) markRecovery(false);
+    }, [authLoading, user]);
 
     async function applyPersistence() {
         // "Remember me" → keep the session after the tab/browser closes.
@@ -132,8 +211,9 @@ function LoginForm() {
     }
 
     // Show spinner while: Firebase is initialising, a sign-in is in flight, or
-    // we're about to redirect after success.
-    if (authLoading || loading || user) return <CenteredSpinner />;
+    // we're about to redirect after success — unless session recovery already
+    // failed, in which case the form (with the reason) must win over the spinner.
+    if (!showFormAnyway && (authLoading || loading || user)) return <CenteredSpinner />;
 
     return (
         <>

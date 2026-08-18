@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { MapPin, Clock, Navigation, Eye, Search, ChevronDown, Check } from "lucide-react";
+import { MapPin, Clock, Navigation, Eye, Search, ChevronDown, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
 import type { StationPublic } from "@/lib/api";
 
-const FEATURE_OPTIONS = ["Free Water", "Nitrogen Air", "Parking", "Restroom", "Air Filling"];
+const FEATURE_OPTIONS = ["Free water", "Nitrogen air", "Parking", "Restroom", "Air filling"];
 const PER_PAGE = 9;
 
 // Full network of station locations ("District - Area"), shown in the location
@@ -121,6 +121,22 @@ function directionsUrl(s: StationPublic): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${s.stationName ?? ""} ${s.district ?? ""}`)}`;
 }
 
+// Compact page list: first, last and a small window around the current page,
+// with "…" gaps for the rest. A station network this size can hit 9+ pages, and
+// rendering one circle per page overflowed a 320px viewport — this keeps the
+// control narrow. ≤7 pages just shows every page.
+function paginationRange(current: number, total: number): (number | "ellipsis")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const out: (number | "ellipsis")[] = [1];
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  if (start > 2) out.push("ellipsis");
+  for (let i = start; i <= end; i++) out.push(i);
+  if (end < total - 1) out.push("ellipsis");
+  out.push(total);
+  return out;
+}
+
 // Custom, on-theme location dropdown. A native <select> can't have its option
 // list styled, so we render our own button + searchable popup (closes on outside
 // click / Escape) with the brand palette and a properly-aligned chevron.
@@ -160,9 +176,8 @@ function LocationSelect({ value, onChange }: { value: string; onChange: (v: stri
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className={`flex w-full items-center justify-between gap-3 rounded-full border bg-white px-4 py-2.5 text-sm font-medium text-ink outline-none transition sm:w-auto sm:min-w-[17rem] ${
-          open ? "border-brand ring-2 ring-brand/15" : "border-line hover:border-brand"
-        }`}
+        className={`flex w-full items-center justify-between gap-3 rounded-full border bg-white px-4 py-2.5 text-sm font-medium text-ink outline-none transition sm:w-auto sm:min-w-[17rem] ${open ? "border-brand ring-2 ring-brand/15" : "border-line hover:border-brand"
+          }`}
       >
         <span className="truncate">{label}</span>
         <ChevronDown
@@ -200,9 +215,8 @@ function LocationSelect({ value, onChange }: { value: string; onChange: (v: stri
                     role="option"
                     aria-selected={active}
                     onClick={() => { onChange(o.value); close(); }}
-                    className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
-                      active ? "bg-brand font-semibold text-white" : "text-ink/75 hover:bg-brand-pale hover:text-brand"
-                    }`}
+                    className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${active ? "bg-brand font-semibold text-white" : "text-ink/75 hover:bg-brand-pale hover:text-brand"
+                      }`}
                   >
                     <span className="truncate">{o.label}</span>
                     {active && <Check size={15} className="shrink-0" />}
@@ -256,41 +270,42 @@ export function StationsExplorer({ stations }: { stations: StationPublic[] }) {
     <div>
       {/* Filters */}
       <div className="mb-8 space-y-4">
-        <div className="relative flex justify-between items-center">
-        <div className="relative max-w-md min-w-md">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/40" />
-          <input
-            value={q}
-            onChange={(e) => { setQ(e.target.value); setPage(1); }}
-            placeholder="Search stations by name or area…"
-            className="w-full rounded-full border border-black/10 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-brand"
-          />
-        </div>
-
-
-        <div className="flex flex-col items-end gap-1.5">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className="text-sm font-medium text-ink/60">Location</span>
-            <LocationSelect value={location} onChange={(v) => { setLocation(v); setPage(1); }} />
+        {/* Stack on phones, lay out side-by-side from sm up. The old `min-w-md`
+            (= 28rem in Tailwind v4) on the search box forced the row wider than a
+            phone viewport, causing the whole page to scroll horizontally. */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-full sm:max-w-md sm:flex-1">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/40" />
+            <input
+              value={q}
+              onChange={(e) => { setQ(e.target.value); setPage(1); }}
+              placeholder="Search stations by name or area…"
+              className="w-full rounded-full border border-black/10 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-brand"
+            />
           </div>
-          <span className="flex items-center gap-1 pr-1 text-xs font-medium text-brand">
-            <MapPin size={12} className="shrink-0" />
-            {filtered.length} {filtered.length === 1 ? "location" : "locations"} near you
-          </span>
-        </div>
+
+          <div className="flex flex-col gap-1.5 sm:items-end">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="text-sm font-medium text-ink/60">Location</span>
+              <LocationSelect value={location} onChange={(v) => { setLocation(v); setPage(1); }} />
+            </div>
+            <span className="flex items-center gap-1 pr-1 text-xs font-medium text-brand">
+              <MapPin size={12} className="shrink-0" />
+              {filtered.length} {filtered.length === 1 ? "location" : "locations"} near you
+            </span>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
           {FEATURE_OPTIONS.map((f) => (
-            <button
+            <div
               key={f}
-              onClick={() => { toggleFeature(f); setPage(1); }}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                features.includes(f) ? "border-brand bg-brand text-white" : "border-black/10 bg-white text-ink/60 hover:border-brand"
-              }`}
+              // onClick={() => { toggleFeature(f); setPage(1); }}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition ${features.includes(f) ? "border-brand bg-brand text-white" : "border-black/10 bg-white text-ink/60 hover:border-brand"
+                }`}
             >
               {f}
-            </button>
+            </div>
           ))}
         </div>
       </div>
@@ -358,21 +373,46 @@ export function StationsExplorer({ stations }: { stations: StationPublic[] }) {
         <div className="card-soft mt-4 text-center text-ink/60">No stations match your filters.</div>
       )}
 
-      {/* Pagination */}
+      {/* Pagination — windowed + wrappable so it never overflows a narrow phone. */}
       {pages > 1 && (
-        <div className="mt-10 flex items-center justify-center gap-2">
-          {Array.from({ length: pages }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={`h-9 w-9 shrink-0 rounded-full text-sm font-semibold transition ${
-                current === i + 1 ? "bg-brand text-white" : "border border-black/10 text-ink/60 hover:border-brand"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
+        <nav className="mt-10 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2" aria-label="Pagination">
+          <button
+            type="button"
+            onClick={() => setPage(Math.max(1, current - 1))}
+            disabled={current === 1}
+            aria-label="Previous page"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-black/10 text-ink/60 transition hover:border-brand disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 sm:w-9"
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          {paginationRange(current, pages).map((it, idx) =>
+            it === "ellipsis" ? (
+              <span key={`gap-${idx}`} className="select-none px-0.5 text-sm text-ink/40">…</span>
+            ) : (
+              <button
+                key={it}
+                type="button"
+                onClick={() => setPage(it)}
+                aria-current={current === it ? "page" : undefined}
+                className={`h-8 w-8 shrink-0 rounded-full text-sm font-semibold transition sm:h-9 sm:w-9 ${current === it ? "bg-brand text-white" : "border border-black/10 text-ink/60 hover:border-brand"
+                  }`}
+              >
+                {it}
+              </button>
+            )
+          )}
+
+          <button
+            type="button"
+            onClick={() => setPage(Math.min(pages, current + 1))}
+            disabled={current === pages}
+            aria-label="Next page"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-black/10 text-ink/60 transition hover:border-brand disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 sm:w-9"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </nav>
       )}
     </div>
   );
