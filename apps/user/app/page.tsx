@@ -88,15 +88,31 @@ export default async function HomePage() {
           {/* Hero carousel + floating badges */}
           <div className="relative mx-auto w-full max-w-xl">
             <HeroCarousel images={heroSlides} alt="KR Trans Fuels Auto LPG station" />
-            <div className="absolute -right-3 top-6 rounded-2xl border border-line bg-white px-4 py-3 shadow-lg">
+            <div className="absolute -right-3 top-6 hidden rounded-2xl border border-line bg-white px-4 py-3 shadow-lg sm:block">
               <div className="text-[10px] font-semibold uppercase tracking-wider text-mutedfg">Trusted</div>
               <div className="text-sm font-extrabold text-ink">Since 2007</div>
             </div>
-            <div className="absolute -left-3 bottom-16 rounded-2xl border border-line bg-white px-4 py-3 shadow-lg">
+            <div className="absolute -left-3 bottom-16 hidden rounded-2xl border border-line bg-white px-4 py-3 shadow-lg sm:block">
               <div className="text-[10px] font-semibold uppercase tracking-wider text-mutedfg">Network</div>
               <div className="text-sm font-extrabold text-ink">{fmtCount(count)} Stations</div>
             </div>
-            <div className="absolute -right-3 bottom-6 rounded-2xl border border-line bg-white px-4 py-3 shadow-lg">
+            <div className="absolute -right-3 bottom-6 hidden rounded-2xl border border-line bg-white px-4 py-3 shadow-lg sm:block">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-mutedfg">Save</div>
+              <div className="text-sm font-extrabold text-brand">{savingsPct}% Savings</div>
+            </div>
+          </div>
+
+          {/* Mobile-only: badges as a single-row grid under the image */}
+          <div className="grid grid-cols-3 gap-2 sm:hidden">
+            <div className="rounded-2xl border border-line bg-white px-3 py-3 text-center shadow-lg">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-mutedfg">Trusted</div>
+              <div className="text-sm font-extrabold text-ink">Since 2007</div>
+            </div>
+            <div className="rounded-2xl border border-line bg-white px-3 py-3 text-center shadow-lg">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-mutedfg">Network</div>
+              <div className="text-sm font-extrabold text-ink">{fmtCount(count)} Stations</div>
+            </div>
+            <div className="rounded-2xl border border-line bg-white px-3 py-3 text-center shadow-lg">
               <div className="text-[10px] font-semibold uppercase tracking-wider text-mutedfg">Save</div>
               <div className="text-sm font-extrabold text-brand">{savingsPct}% Savings</div>
             </div>
