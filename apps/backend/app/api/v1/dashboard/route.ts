@@ -15,6 +15,15 @@ function toMs(value: any): number {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
+// Start of the current calendar month in IST (the business timezone the admin
+// UI renders dates in), returned as epoch ms.
+function startOfMonthIST(nowMs: number): number {
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+  const ist = new Date(nowMs + IST_OFFSET_MS);
+  const monthStartIST = Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), 1, 0, 0, 0, 0);
+  return monthStartIST - IST_OFFSET_MS;
+}
+
 function normalizeStationId(stationId: any): string | null {
   if (stationId && typeof stationId === "object" && "id" in stationId) return stationId.id;
   if (typeof stationId === "string" && stationId.trim() !== "") return stationId;
@@ -31,7 +40,7 @@ export async function GET(req: NextRequest) {
   try {
     const categoriesList = FEEDBACK_CATEGORIES;
 
-    const last30DaysMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const monthStartMs = startOfMonthIST(Date.now());
 
     // Fetch collections in parallel. product_categories is only needed as a
     // count, so use a server-side aggregation (reads 0 docs) instead of pulling
@@ -92,7 +101,7 @@ export async function GET(req: NextRequest) {
 
     // ── Enquiries (enquiryDetails — separate from feedbacks) ───
     const enquiriesThisMonth = enquiriesSnap.filter(
-      (doc) => toMs(doc.data().createdAt) >= last30DaysMs
+      (doc) => toMs(doc.data().createdAt) >= monthStartMs
     ).length;
 
     const recentEnquiries = enquiriesSnap.slice(0, 5).map((doc) => {
