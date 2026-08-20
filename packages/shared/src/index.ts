@@ -15,3 +15,4 @@ export * from "./validators/faq.schema";
 export * from "./validators/enquiry.schema";
 export * from "./validators/feedback.schema";
 export * from "./validators/admin-contact.schema";
+export * from "./utils/slug";

@@ -1,4 +1,5 @@
 
+import { unstable_rethrow } from "next/navigation";
 import DashboardClient from "./DashboardClient";
 import type { FuelPrices, DashboardData } from "@/types";
 import { serverFetch } from "@/lib/server-fetch";
@@ -12,6 +13,7 @@ async function getFuelPrices(): Promise<FuelPrices> {
         return res.data;
     }
     catch(error: any) {
+        unstable_rethrow(error); // let serverFetch's expired-session redirect through
         console.error("Error fetching fuel prices:", error);
         return { 
             diesel: 0, 
@@ -28,6 +30,7 @@ async function getDashboardData(): Promise<DashboardData> {
         return res.data;
     } 
     catch(error) {
+        unstable_rethrow(error); // let serverFetch's expired-session redirect through
         console.error("Error fetching dashboard data:", error);
         return {
             stations: { total: 0, active: 0, inactive: 0 },

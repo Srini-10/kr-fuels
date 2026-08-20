@@ -6,6 +6,7 @@
 
 export interface PublicStation {
   id: string;
+  slug: string;
   stationName: string;
   district: string;
   area: string;
@@ -47,6 +48,9 @@ export function normalizeStation(id: string, d: any): PublicStation {
 
   return {
     id,
+    // Empty until the backfill runs; callers fall back to `id` so a slug-less
+    // station still resolves at its old URL.
+    slug: d?.slug ?? "",
     stationName: d?.stationName ?? "",
     district: d?.district ?? "",
     area: d?.area ?? "",

@@ -1,14 +1,42 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
+import { getStations } from "@/lib/api";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+// Re-generated hourly so newly added stations appear without a redeploy.
+export const revalidate = 3600;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // "/lubricants" retired (client request) — the route now 404s, so it must stay out
   // of the sitemap. Re-add it here if the page is ever restored.
   const routes = ["", "/about", "/products", "/conversionkit", "/tanks", "/stations", "/guide", "/contact", "/privacy"];
-  return routes.map((r) => ({
+  const now = new Date();
+
+  const staticEntries: MetadataRoute.Sitemap = routes.map((r) => ({
     url: `${SITE_URL}${r}`,
-    lastModified: new Date(),
+    lastModified: now,
     changeFrequency: "weekly",
     priority: r === "" ? 1 : 0.7,
   }));
+
+  // Station detail pages. These are the pages the SEO slugs exist for, so leaving
+  // them out of the sitemap would waste the change — every station is a distinct
+  // local-search landing page ("auto lpg neelambur coimbatore"). Falls back to the
+  // document id for any station the slug backfill hasn't reached.
+  let stationEntries: MetadataRoute.Sitemap = [];
+  try {
+    const { data } = await getStations();
+    stationEntries = data
+      .filter((s) => (s.status ?? "active") === "active")
+      .map((s) => ({
+        url: `${SITE_URL}/stations/${s.slug || s.id}`,
+        lastModified: now,
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      }));
+  } catch {
+    // Backend unreachable — still emit a valid sitemap of the static routes
+    // rather than failing the whole document.
+  }
+
+  return [...staticEntries, ...stationEntries];
 }

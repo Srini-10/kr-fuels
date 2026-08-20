@@ -46,6 +46,8 @@ export async function getFuelPrices(): Promise<FuelPricesPublic> {
 
 export interface StationPublic {
   id: string;
+  /** SEO URL segment; empty for stations created before slugs. Use stationHref(). */
+  slug?: string;
   stationName?: string;
   district?: string;
   area?: string;
