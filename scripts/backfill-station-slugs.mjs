@@ -16,6 +16,7 @@
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const APPLY = process.argv.includes("--apply");
@@ -63,8 +64,12 @@ function stationSlug(s) {
 }
 
 // --- go ---------------------------------------------------------------------
-const { cert, initializeApp } = await import("firebase-admin/app");
-const { getFirestore } = await import("firebase-admin/firestore");
+// This is a pnpm workspace: firebase-admin is a dependency of apps/backend, not
+// of the repo root, and ESM resolves bare specifiers relative to THIS file.
+// Resolve from the backend package instead so the script runs from anywhere.
+const require = createRequire(resolve(REPO, "apps/backend/package.json"));
+const { cert, initializeApp } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
 
 initializeApp({
   credential: cert({
