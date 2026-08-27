@@ -44,6 +44,7 @@ const slugify = (input) =>
   (input ?? "")
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\b([a-zA-Z])\s*\.\s*(?=[a-zA-Z]\b|\s|$)/g, "$1")
     .toLowerCase()
     .replace(/&/g, " and ")
     .replace(/[^a-z0-9]+/g, "-")

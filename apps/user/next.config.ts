@@ -16,6 +16,57 @@ const nextConfig: NextConfig = {
     return [
       { source: "/lubricants", destination: "/products", permanent: true },
       { source: "/products/lubricants", destination: "/products", permanent: true },
+      // Station URL corrections (KR Trans Fuels & T.V. Kovil)
+      {
+        source: "/stations/k-r-trans-fuels-private-limited-pasumalai-madurai",
+        destination: "/stations/kr-trans-fuels-private-limited-pasumalai-madurai",
+        permanent: true,
+      },
+      {
+        source: "/stations/k-r-trans-fuels-private-limited-madurai-sivagangai-road",
+        destination: "/stations/kr-trans-fuels-private-limited-madurai-sivagangai-road",
+        permanent: true,
+      },
+      {
+        source: "/stations/k-r-trans-fuels-private-limited-salem-bangalore-bypass-road",
+        destination: "/stations/kr-trans-fuels-private-limited-salem-bangalore-bypass-road",
+        permanent: true,
+      },
+      {
+        source: "/stations/k-r-trans-fuels-private-limited-devakottai-sivagangai",
+        destination: "/stations/kr-trans-fuels-private-limited-devakottai-sivagangai",
+        permanent: true,
+      },
+      {
+        source: "/stations/k-r-trans-fuels-private-limited-kattupakkam-chennai",
+        destination: "/stations/kr-trans-fuels-private-limited-kattupakkam-chennai",
+        permanent: true,
+      },
+      {
+        source: "/stations/k-r-trans-fuels-private-limited-tvs-tolgate-tiruchirappalli",
+        destination: "/stations/kr-trans-fuels-private-limited-tvs-tolgate-tiruchirappalli",
+        permanent: true,
+      },
+      {
+        source: "/stations/k-r-trans-fuels-private-limited-kanchipuram-road-chengalpattu",
+        destination: "/stations/kr-trans-fuels-private-limited-kanchipuram-road-chengalpattu",
+        permanent: true,
+      },
+      {
+        source: "/stations/k-r-trans-fuels-private-limited-new-bus-stand-thanjavur",
+        destination: "/stations/kr-trans-fuels-private-limited-new-bus-stand-thanjavur",
+        permanent: true,
+      },
+      {
+        source: "/stations/k-r-trans-fuels-private-limited-velachery-chennai",
+        destination: "/stations/kr-trans-fuels-private-limited-velachery-chennai",
+        permanent: true,
+      },
+      {
+        source: "/stations/kr-fuels-t-v-kovil-tiruchirappalli",
+        destination: "/stations/kr-fuels-tv-kovil-tiruchirappalli",
+        permanent: true,
+      },
     ];
   },
   images: {

@@ -25,7 +25,10 @@ export async function GET(_req: Request, { params }: Params) {
     // whose name genuinely resembles an id still resolves.
     const bySlug = async () => {
       const snap = await adminDb.collection("stations").where("slug", "==", id).limit(1).get();
-      return snap.empty ? null : snap.docs[0];
+      if (!snap.empty) return snap.docs[0];
+      const legacySnap = await adminDb.collection("stations").where("legacySlugs", "array-contains", id).limit(1).get();
+      if (!legacySnap.empty) return legacySnap.docs[0];
+      return null;
     };
     const byId = async () => {
       const snap = await adminDb.collection("stations").doc(id).get();

@@ -7,11 +7,12 @@
 //
 //   Sivan Auto Gas / Neelambur / Coimbatore  ->  sivan-auto-gas-neelambur-coimbatore
 
-/** Lowercase, strip accents, collapse everything non-alphanumeric to single hyphens. */
+/** Lowercase, strip accents, collapse single-letter abbreviations (e.g. K.R., T.V.), and collapse everything non-alphanumeric to single hyphens. */
 export function slugify(input: string): string {
     return (input ?? "")
         .normalize("NFKD")            // split accented chars into base + combining mark
         .replace(/[\u0300-\u036f]/g, "") // drop the combining marks
+        .replace(/\b([a-zA-Z])\s*\.\s*(?=[a-zA-Z]\b|\s|$)/g, "$1") // collapse dotted single-letter abbreviations like "K.R." -> "KR", "T.V." -> "TV"
         .toLowerCase()
         .replace(/&/g, " and ")
         .replace(/[^a-z0-9]+/g, "-")
