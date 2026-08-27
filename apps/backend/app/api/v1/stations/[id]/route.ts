@@ -2,7 +2,7 @@ import { verifySession } from "@/lib/auth/verify-session";
 import { adminDb, adminStorage } from "@/lib/firebase/admin";
 import { StationPatchSchema, StationSchema } from "@kr/shared/validators/station.schema";
 import { NextRequest, NextResponse } from "next/server";
-import { pushImagesToStorage } from "../route";
+import { pushImagesToStorage, slugTakenBy } from "../route";
 import { FieldValue } from "firebase-admin/firestore";
 import { flattenObject } from "../../admin-contact/essentials/route";
 export const dynamic = "force-dynamic"
@@ -76,6 +76,17 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
   try {
     const updatedData: Record<string, any> = flattenObject(result.data)
+
+    // An admin-supplied slug must stay unique across stations, or two pages
+    // would answer at the same URL and the lookup would pick one arbitrarily.
+    // Checked against every OTHER station so re-saving the form unchanged is a
+    // no-op rather than a false collision.
+    if (result.data.slug && (await slugTakenBy(result.data.slug, id))) {
+      return NextResponse.json(
+        { error: `The URL "${result.data.slug}" is already used by another station` },
+        { status: 409 }
+      );
+    }
 
     // Images-only change is a valid update: the arrayUnion is added before the
     // empty-payload guard so it never trips the "No fields to update" 400.

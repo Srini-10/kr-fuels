@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { StationGallery } from "@/components/StationGallery";
 import { MapPin, Clock, Navigation, Phone, User, Mail, ArrowLeft } from "lucide-react";
 import { getStation } from "@/lib/api";
 import { STATIONS_FALLBACK } from "@/lib/fallbacks";
+import { SITE_URL } from "@/lib/site";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -14,16 +15,28 @@ interface Props {
 export const revalidate = 60;
 
 // Real backend station wins; otherwise use the fallback set (so demo "View" works).
-async function resolveStation(id: string) {
-  return (await getStation(id)) ?? STATIONS_FALLBACK.find((x) => x.id === id) ?? null;
+// `handle` is either an SEO slug or a legacy Firestore document id — the backend
+// resolves both.
+async function resolveStation(handle: string) {
+  return (
+    (await getStation(handle)) ??
+    STATIONS_FALLBACK.find((x) => x.id === handle || x.slug === handle) ??
+    null
+  );
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const s = await resolveStation(id);
+  if (!s) return { title: "Station" };
+
+  const where = [s.area, s.district].filter(Boolean).join(", ");
   return {
-    title: s?.stationName ? `${s.stationName} — Auto LPG Station` : "Station",
-    description: s ? `Auto LPG station in ${s.district}. Working hours, directions and amenities.` : undefined,
+    title: s.stationName ? `${s.stationName} — Auto LPG Station${where ? ` in ${where}` : ""}` : "Station",
+    description: `Auto LPG station${where ? ` in ${where}` : ""}. Working hours, directions and amenities.`,
+    // Point every variant of this page (legacy id URL, slug URL) at the one
+    // canonical slug address so the ranking isn't split across both.
+    alternates: { canonical: `${SITE_URL}/stations/${s.slug || s.id}` },
   };
 }
 
@@ -31,6 +44,11 @@ export default async function StationDetailPage({ params }: Props) {
   const { id } = await params;
   const s = await resolveStation(id);
   if (!s) notFound();
+
+  // Stations used to live at /stations/<firestore-id>. Those URLs may be indexed
+  // or bookmarked, so they keep working — but send them on to the canonical slug
+  // with a 301 so the ranking consolidates on one address instead of two.
+  if (s.slug && s.slug !== id) permanentRedirect(`/stations/${s.slug}`);
 
   const line = [s.address?.doorNo, s.address?.street].filter(Boolean).join(", ");
   const pincode = s.address?.pincode ? ` - ${s.address.pincode}` : "";

@@ -61,6 +61,16 @@ export const StationPatchSchema = z.object({
   status: z.string().optional(),
   location: StationLocationSchema.partial().optional(),
   primaryImage: z.string().optional(),
+  // Deliberate URL override. Slugs are generated once at creation and then
+  // frozen (renaming a station must not silently move an indexed URL), so this
+  // only changes when an admin edits it on purpose. Constrained to the same
+  // shape the generator produces; the server still de-duplicates it.
+  slug: z
+    .string()
+    .min(3)
+    .max(120)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers and single hyphens")
+    .optional(),
 });
 
 export const StationRowSchema = z.object({

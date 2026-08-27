@@ -14,6 +14,11 @@ export interface StationLocation {
 
 export interface Station {
     id?: string;
+    // SEO URL segment for the public station page, e.g.
+    // "sivan-auto-gas-neelambur-coimbatore". Written once when the station is
+    // created and then left alone so indexed URLs stay put; optional because
+    // stations created before slugs existed are backfilled separately.
+    slug?: string;
     district: string;
     area: string;
     stationName: string;

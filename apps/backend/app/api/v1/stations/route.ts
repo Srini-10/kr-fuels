@@ -3,6 +3,7 @@ import { verifySession } from "@/lib/auth/verify-session";
 import { NextRequest, NextResponse } from "next/server";
 import { type DocumentData, FieldValue } from "firebase-admin/firestore";
 import { StationSchema } from "@kr/shared/validators/station.schema";
+import { stationSlug, uniqueStationSlug } from "@kr/shared/utils/slug";
 import { DecodedIdToken } from "firebase-admin/auth";
 import AppError from "@/utils/appError";
 export const dynamic = "force-dynamic"
@@ -171,8 +172,15 @@ export async function POST(request: NextRequest) {
 
     const imageUrls = await pushImagesToStorage(formData, user);
 
+    // SEO slug for the public URL (/stations/sivan-auto-gas-neelambur-coimbatore
+    // rather than the opaque document id). Generated once, here, and then frozen:
+    // the admin can rewrite it deliberately, but renaming a station must not
+    // silently change a URL that search engines have already indexed.
+    const slug = await uniqueStationSlug(stationSlug(result.data), slugTaken);
+
     const docData = {
       ...result.data,
+      slug,
       images: imageUrls,
       createdAt: FieldValue.serverTimestamp(),
       createdBy: user.uid,
@@ -211,6 +219,15 @@ export async function POST(request: NextRequest) {
   }
 }
 
+
+// True when another station already owns this slug. `exceptId` lets an update
+// keep its own slug without colliding with itself.
+export const slugTakenBy = async (candidate: string, exceptId?: string): Promise<boolean> => {
+  const snap = await adminDb.collection("stations").where("slug", "==", candidate).get();
+  return snap.docs.some((d) => d.id !== exceptId);
+};
+
+const slugTaken = (candidate: string) => slugTakenBy(candidate);
 
 export const pushImagesToStorage = async (
   formData: FormData,

@@ -10,7 +10,8 @@
     "./firebase/client": "./src/firebase/client.ts",
     "./firebase/firestore": "./src/firebase/firestore.ts",
     "./constants/colors": "./src/constants/colors.ts",
-    "./lib/utils": "./src/lib/utils.ts"
+    "./lib/utils": "./src/lib/utils.ts",
+    "./utils/*": "./src/utils/*.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",

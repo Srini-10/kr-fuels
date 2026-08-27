@@ -360,7 +360,7 @@ export function StationsExplorer({ stations }: { stations: StationPublic[] }) {
                 <Link href={directionsUrl(s)} target="_blank" rel="noopener noreferrer" className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-brand py-2 text-xs font-semibold text-white hover:bg-brand-dark">
                   <Navigation size={13} /> Directions
                 </Link>
-                <Link href={`/stations/${s.id}`} className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-brand/30 py-2 text-xs font-semibold text-brand hover:bg-brand-pale">
+                <Link href={`/stations/${s.slug || s.id}`} className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-brand/30 py-2 text-xs font-semibold text-brand hover:bg-brand-pale">
                   <Eye size={13} /> View
                 </Link>
               </div>
