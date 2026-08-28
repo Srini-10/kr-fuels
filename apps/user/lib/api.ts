@@ -8,7 +8,10 @@ import {
   type JourneyMilestone,
 } from "@kr/shared/types";
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000/api/v1";
+const BASE =
+  (typeof window === "undefined" && process.env.INTERNAL_API_URL) ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "http://127.0.0.1:4000/api/v1";
 
 // All website reads go through the backend public endpoints. Each call degrades
 // gracefully to a sensible fallback so the site renders even if the API is down.
@@ -65,6 +68,7 @@ export interface StationPublic {
   mobileNumber?: string;
   telephone?: string;
   emailID?: string;
+  legacySlugs?: string[];
   [key: string]: any;
 }
 
@@ -73,6 +77,22 @@ export async function getStations(): Promise<{ data: StationPublic[]; total: num
 }
 
 export async function getStation(id: string): Promise<StationPublic | null> {
+  // Fast memory lookup from cached station list (avoids extra network roundtrip)
+  try {
+    const list = await getStations();
+    if (list?.data?.length) {
+      const match = list.data.find(
+        (s) =>
+          s.id === id ||
+          s.slug === id ||
+          (Array.isArray(s.legacySlugs) && s.legacySlugs.includes(id))
+      );
+      if (match) return match;
+    }
+  } catch {
+    // ignore and fall back to single fetch
+  }
+
   const j = await getJson<{ data: StationPublic | null }>(`/public/stations/${id}`, { data: null }, 300);
   return j.data;
 }
