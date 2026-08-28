@@ -1,8 +1,8 @@
 "use client"
 import { useState, useEffect, useRef, type FC } from "react";
-import { Plus, Edit2, Trash2, MapPin, Store, Check, Map, AlertCircle, Grid, List, Clock, Upload, Loader2, User, Phone, X } from "lucide-react";
+import { Plus, Edit2, Trash2, MapPin, Store, Check, Map, AlertCircle, Grid, List, Clock, Upload, Loader2, User, Phone, X, Search } from "lucide-react";
 import { C } from "../../../constants/colors";
-import { card, btn, iconBtn } from "../../../styles/shared";
+import { card, btn, iconBtn, inp } from "../../../styles/shared";
 import { Badge, StatCard, Select } from "../../../components/ui";
 import type { StationFormDraft } from "../../../types";
 import Folder from "./_components/Folder";
@@ -39,6 +39,7 @@ const StationsPage: FC<StationResponse> = (props) => {
   const [stats, setStats] = useState(initialStats)
   const [view, setView] = useState<"table" | "grid">("grid");
   const [isMobile, setIsMobile] = useState(false)
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [district, setDistrict] = useState("All");
   const [area, setArea] = useState("All");
@@ -59,6 +60,16 @@ const StationsPage: FC<StationResponse> = (props) => {
   // newer one — kills the stale-data race when filters change quickly.
   const reqId = useRef(0)
   const restored = useRef(false)
+  const searchTimer = useRef<NodeJS.Timeout | null>(null)
+
+  const handleSearchChange = (val: string) => {
+    setSearchInput(val)
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    searchTimer.current = setTimeout(() => {
+      setSearch(val.trim())
+      setPage(1)
+    }, 300)
+  }
 
   // Filter sources are derived from the latest stats (not separate state) so the
   // dropdowns always reflect the real station data. district == "City" here; the
@@ -276,6 +287,17 @@ const StationsPage: FC<StationResponse> = (props) => {
           flexWrap: "wrap",
           alignItems: "center",
         }}>
+          {/* Search box */}
+          <div style={{ position: "relative", flex: "1 1 200px", maxWidth: 280, minWidth: 160 }}>
+            <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: C.tm }} />
+            <input
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search station or code…"
+              style={{ ...inp(), paddingLeft: 30, width: "100%", height: 32, fontSize: 12 }}
+            />
+          </div>
+
           {/* City filter — active-only districts, mirrors the mobile app's locator */}
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: C.p }}>City</span>
@@ -304,10 +326,10 @@ const StationsPage: FC<StationResponse> = (props) => {
             />
           </div>
 
-          {/* Clear filters — only shown when a city/area filter is active */}
-          {filtersActive && (
+          {/* Clear filters — only shown when a city/area/search filter is active */}
+          {(filtersActive || searchInput) && (
             <button
-              onClick={clearFilters}
+              onClick={() => { clearFilters(); setSearchInput(""); setSearch(""); }}
               title="Clear filters"
               aria-label="Clear filters"
               style={{ ...btn("ghost"), padding: "6px 10px", fontSize: 12, color: C.red }}
@@ -345,14 +367,21 @@ const StationsPage: FC<StationResponse> = (props) => {
             </div>
           )}
 
-          <button style={btn()} onClick={openAdd}><Plus size={14} />Add Station</button>
+          {loading && (
+            <div style={{ display: "flex", alignItems: "center", gap: 6, color: C.p, fontSize: 12, marginLeft: "auto" }}>
+              <Loader2 size={14} className="animate-spin" />
+              <span style={{ fontSize: 11 }}>Updating…</span>
+            </div>
+          )}
+
+          <button style={{ ...btn(), marginLeft: loading ? 0 : "auto" }} onClick={openAdd}><Plus size={14} />Add Station</button>
           <button style={btn()} onClick={() => setExcelOpen(true)}><Upload size={14} />Upload</button>
         </div>
 
         <ExcelUploadModal open={excelOpen} setOpen={setExcelOpen} fetchList={fetchStations} />
 
-        {/* Loading skeleton */}
-        {loading && (
+        {/* Loading skeleton for initial empty load */}
+        {loading && list.length === 0 && (
           <>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
@@ -393,8 +422,8 @@ const StationsPage: FC<StationResponse> = (props) => {
         )}
 
         {/* Table view — desktop only */}
-        {!loading && view === "table" && !isMobile && (
-          <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        {list.length > 0 && view === "table" && !isMobile && (
+          <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch", opacity: loading ? 0.6 : 1, transition: "opacity 0.15s" }}>
             <table style={{ width: "100%", minWidth: 720, borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: C.bg }}>
@@ -453,9 +482,11 @@ const StationsPage: FC<StationResponse> = (props) => {
         )}
 
         {/* Grid view — always on mobile, optional on desktop */}
-        {!loading && (view === "grid" || isMobile) && (
+        {list.length > 0 && (view === "grid" || isMobile) && (
           <div style={{
             display: "grid",
+            opacity: loading ? 0.6 : 1,
+            transition: "opacity 0.15s",
             gridTemplateColumns: isMobile
               ? "repeat(auto-fill, minmax(min(100%, 160px), 1fr))"
               : "repeat(auto-fill, minmax(280px, 1fr))",
@@ -528,6 +559,12 @@ const StationsPage: FC<StationResponse> = (props) => {
               </div>
               )
             })}
+          </div>
+        )}
+
+        {!loading && list.length === 0 && (
+          <div style={{ padding: "48px 16px", textAlign: "center", color: C.tm, fontSize: 13 }}>
+            No stations match your filters.
           </div>
         )}
 

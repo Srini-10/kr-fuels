@@ -45,7 +45,7 @@ export function Header({
   // doesn't remount the page, so the explorer keeps its current filters. Tell it
   // to clear them so the screen opens fresh, like a refresh would.
   const resetStationFilters = (href: string) => {
-    if (href === "/stations" && pathname === "/stations") {
+    if (href === "/stations" && pathname.startsWith("/stations")) {
       window.dispatchEvent(new Event("stations:reset"));
     }
   };
