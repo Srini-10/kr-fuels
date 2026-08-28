@@ -243,9 +243,25 @@ export function StationsExplorer({
   const [q, setQ] = useState("");
   const [page, setPage] = useState(initialPage);
 
+  // Sync page state when initialPage prop changes
   useEffect(() => {
     setPage(initialPage);
   }, [initialPage]);
+
+  // Handle browser Back/Forward navigation
+  useEffect(() => {
+    const onPopState = () => {
+      const match = window.location.pathname.match(/^\/stations\/(\d{1,3})$/);
+      if (match) {
+        const p = Number.parseInt(match[1], 10);
+        if (p >= 1) setPage(p);
+      } else if (window.location.pathname === "/stations") {
+        setPage(1);
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   const toggleFeature = (f: string) =>
     setFeatures((p) => (p.includes(f) ? p.filter((x) => x !== f) : [...p, f]));
@@ -278,8 +294,33 @@ export function StationsExplorer({
   const pageSlug = String(current).padStart(2, "0");
   const pageHref = (p: number) => `/stations/${String(p).padStart(2, "0")}`;
 
+  const handlePageClick = (p: number, e: React.MouseEvent) => {
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button !== 0) {
+      return; // let browser open in new tab
+    }
+    e.preventDefault();
+    const target = Math.max(1, Math.min(pages, p));
+    setPage(target);
+    const targetHref = pageHref(target);
+    if (window.location.pathname !== targetHref) {
+      window.history.pushState({ page: target }, "", targetHref);
+    }
+    const topEl = document.getElementById("stations-grid-top");
+    if (topEl) {
+      topEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleFilterChange = (updater: () => void) => {
+    updater();
+    setPage(1);
+    if (window.location.pathname.startsWith("/stations/") && !window.location.pathname.includes("/stations/01")) {
+      window.history.replaceState({ page: 1 }, "", "/stations/01");
+    }
+  };
+
   return (
-    <div>
+    <div id="stations-grid-top">
       {/* Filters */}
       <div className="mb-8 space-y-4">
         {/* Stack on phones, lay out side-by-side from sm up. The old `min-w-md`
@@ -290,7 +331,7 @@ export function StationsExplorer({
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/40" />
             <input
               value={q}
-              onChange={(e) => { setQ(e.target.value); setPage(1); }}
+              onChange={(e) => handleFilterChange(() => setQ(e.target.value))}
               placeholder="Search stations by name or area…"
               className="w-full rounded-full border border-black/10 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-brand"
             />
@@ -299,7 +340,10 @@ export function StationsExplorer({
           <div className="flex flex-col gap-1.5 sm:items-end">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="text-sm font-medium text-ink/60">Location</span>
-              <LocationSelect value={location} onChange={(v) => { setLocation(v); setPage(1); }} />
+              <LocationSelect
+                value={location}
+                onChange={(v) => handleFilterChange(() => setLocation(v))}
+              />
             </div>
             <span className="flex items-center gap-1 pr-1 text-xs font-medium text-brand">
               <MapPin size={12} className="shrink-0" />
@@ -390,6 +434,7 @@ export function StationsExplorer({
         <nav className="mt-10 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2" aria-label="Pagination">
           <Link
             href={pageHref(Math.max(1, current - 1))}
+            onClick={(e) => handlePageClick(current - 1, e)}
             aria-disabled={current === 1}
             tabIndex={current === 1 ? -1 : undefined}
             aria-label="Previous page"
@@ -407,6 +452,7 @@ export function StationsExplorer({
               <Link
                 key={it}
                 href={pageHref(it)}
+                onClick={(e) => handlePageClick(it, e)}
                 aria-current={current === it ? "page" : undefined}
                 className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-semibold transition sm:h-9 sm:w-9 ${
                   current === it ? "bg-brand text-white" : "border border-black/10 text-ink/60 hover:border-brand"
@@ -419,6 +465,7 @@ export function StationsExplorer({
 
           <Link
             href={pageHref(Math.min(pages, current + 1))}
+            onClick={(e) => handlePageClick(current + 1, e)}
             aria-disabled={current === pages}
             tabIndex={current === pages ? -1 : undefined}
             aria-label="Next page"
