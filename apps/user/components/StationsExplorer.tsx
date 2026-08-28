@@ -231,11 +231,21 @@ function LocationSelect({ value, onChange }: { value: string; onChange: (v: stri
   );
 }
 
-export function StationsExplorer({ stations }: { stations: StationPublic[] }) {
+export function StationsExplorer({
+  stations,
+  initialPage = 1,
+}: {
+  stations: StationPublic[];
+  initialPage?: number;
+}) {
   const [location, setLocation] = useState("All");
   const [features, setFeatures] = useState<string[]>([]);
   const [q, setQ] = useState("");
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(initialPage);
+
+  useEffect(() => {
+    setPage(initialPage);
+  }, [initialPage]);
 
   const toggleFeature = (f: string) =>
     setFeatures((p) => (p.includes(f) ? p.filter((x) => x !== f) : [...p, f]));
@@ -265,6 +275,8 @@ export function StationsExplorer({ stations }: { stations: StationPublic[] }) {
   const pages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const current = Math.min(page, pages);
   const shown = filtered.slice((current - 1) * PER_PAGE, current * PER_PAGE);
+  const pageSlug = String(current).padStart(2, "0");
+  const pageHref = (p: number) => `/stations/${String(p).padStart(2, "0")}`;
 
   return (
     <div>
@@ -360,7 +372,7 @@ export function StationsExplorer({ stations }: { stations: StationPublic[] }) {
                 <Link href={directionsUrl(s)} target="_blank" rel="noopener noreferrer" className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-brand py-2 text-xs font-semibold text-white hover:bg-brand-dark">
                   <Navigation size={13} /> Directions
                 </Link>
-                <Link href={`/stations/${s.slug || s.id}`} className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-brand/30 py-2 text-xs font-semibold text-brand hover:bg-brand-pale">
+                <Link href={`/stations/${pageSlug}/${s.slug || s.id}`} className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-brand/30 py-2 text-xs font-semibold text-brand hover:bg-brand-pale">
                   <Eye size={13} /> View
                 </Link>
               </div>
@@ -376,42 +388,46 @@ export function StationsExplorer({ stations }: { stations: StationPublic[] }) {
       {/* Pagination — windowed + wrappable so it never overflows a narrow phone. */}
       {pages > 1 && (
         <nav className="mt-10 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2" aria-label="Pagination">
-          <button
-            type="button"
-            onClick={() => setPage(Math.max(1, current - 1))}
-            disabled={current === 1}
+          <Link
+            href={pageHref(Math.max(1, current - 1))}
+            aria-disabled={current === 1}
+            tabIndex={current === 1 ? -1 : undefined}
             aria-label="Previous page"
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-black/10 text-ink/60 transition hover:border-brand disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 sm:w-9"
+            className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border border-black/10 text-ink/60 transition hover:border-brand sm:h-9 sm:w-9 ${
+              current === 1 ? "pointer-events-none opacity-40" : ""
+            }`}
           >
             <ChevronLeft size={16} />
-          </button>
+          </Link>
 
           {paginationRange(current, pages).map((it, idx) =>
             it === "ellipsis" ? (
               <span key={`gap-${idx}`} className="select-none px-0.5 text-sm text-ink/40">…</span>
             ) : (
-              <button
+              <Link
                 key={it}
-                type="button"
-                onClick={() => setPage(it)}
+                href={pageHref(it)}
                 aria-current={current === it ? "page" : undefined}
-                className={`h-8 w-8 shrink-0 rounded-full text-sm font-semibold transition sm:h-9 sm:w-9 ${current === it ? "bg-brand text-white" : "border border-black/10 text-ink/60 hover:border-brand"
-                  }`}
+                className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-semibold transition sm:h-9 sm:w-9 ${
+                  current === it ? "bg-brand text-white" : "border border-black/10 text-ink/60 hover:border-brand"
+                }`}
               >
                 {it}
-              </button>
+              </Link>
             )
           )}
 
-          <button
-            type="button"
-            onClick={() => setPage(Math.min(pages, current + 1))}
-            disabled={current === pages}
+          <Link
+            href={pageHref(Math.min(pages, current + 1))}
+            aria-disabled={current === pages}
+            tabIndex={current === pages ? -1 : undefined}
             aria-label="Next page"
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-black/10 text-ink/60 transition hover:border-brand disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 sm:w-9"
+            className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border border-black/10 text-ink/60 transition hover:border-brand sm:h-9 sm:w-9 ${
+              current === pages ? "pointer-events-none opacity-40" : ""
+            }`}
           >
             <ChevronRight size={16} />
-          </button>
+          </Link>
         </nav>
       )}
     </div>
