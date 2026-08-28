@@ -21,10 +21,14 @@ const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:4000/api/
 const FIRESTORE_ID = /^[A-Za-z0-9]{20}$/;
 
 export async function proxy(req: NextRequest) {
-    const match = req.nextUrl.pathname.match(/^\/stations\/([^/]+)\/?$/);
+    const match = req.nextUrl.pathname.match(/^\/stations\/(?:(\d{1,3})\/)?([^/]+)\/?$/);
     if (!match) return NextResponse.next();
 
-    const handle = decodeURIComponent(match[1]);
+    const pagePrefix = match[1];
+    const handle = decodeURIComponent(match[2]);
+
+    // Skip pure pagination routes like /stations/07
+    if (/^\d+$/.test(handle)) return NextResponse.next();
     if (!FIRESTORE_ID.test(handle)) return NextResponse.next();
 
     try {
@@ -39,7 +43,7 @@ export async function proxy(req: NextRequest) {
         const slug = (await res.json())?.data?.slug;
         if (typeof slug === "string" && slug && slug !== handle) {
             const url = req.nextUrl.clone();
-            url.pathname = `/stations/${slug}`;
+            url.pathname = pagePrefix ? `/stations/${pagePrefix}/${slug}` : `/stations/${slug}`;
             return NextResponse.redirect(url, 301);
         }
     } catch {
@@ -50,5 +54,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/stations/:handle"],
+    matcher: ["/stations/:path*"],
 };

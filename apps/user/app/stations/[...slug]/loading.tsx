@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/Skeleton";
 
-// Instant shell for a station detail page — image grid + details column.
-export default function StationDetailLoading() {
+// Instant shell for station pages
+export default function StationLoading() {
   return (
     <section className="container-x py-12">
       <Skeleton className="mb-6 h-4 w-28" />

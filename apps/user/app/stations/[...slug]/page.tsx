@@ -6,17 +6,14 @@ import { MapPin, Clock, Navigation, Phone, User, Mail, ArrowLeft } from "lucide-
 import { getStation } from "@/lib/api";
 import { STATIONS_FALLBACK } from "@/lib/fallbacks";
 import { SITE_URL } from "@/lib/site";
+import { StationsDirectory } from "../page";
 
 interface Props {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string[] }>;
 }
 
-// ISR: station detail is cacheable; refreshes in the background.
 export const revalidate = 60;
 
-// Real backend station wins; otherwise use the fallback set (so demo "View" works).
-// `handle` is either an SEO slug or a legacy Firestore document id — the backend
-// resolves both.
 async function resolveStation(handle: string) {
   return (
     (await getStation(handle)) ??
@@ -26,30 +23,35 @@ async function resolveStation(handle: string) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-  const s = await resolveStation(id);
+  const { slug } = await params;
+  if (!slug || slug.length === 0) return { title: "Station" };
+
+  // Case 1: Pagination page, e.g. /stations/07 or /stations/7
+  if (slug.length === 1 && /^\d+$/.test(slug[0])) {
+    const pageNum = Number.parseInt(slug[0], 10);
+    return {
+      title: `Auto LPG Stations — Page ${pageNum}`,
+      description: "Find your nearest K.R Trans Fuels Auto LPG station across Tamil Nadu. Filter by district and amenities.",
+      alternates: { canonical: `${SITE_URL}/stations/${slug[0]}` },
+    };
+  }
+
+  // Case 2 or 3: Station detail page (/stations/07/[station-slug] or /stations/[station-slug])
+  const handle = slug.length >= 2 ? slug[1] : slug[0];
+  const s = await resolveStation(handle);
   if (!s) return { title: "Station" };
 
   const where = [s.area, s.district].filter(Boolean).join(", ");
+  const pagePrefix = slug.length >= 2 ? `${slug[0]}/` : "";
+
   return {
     title: s.stationName ? `${s.stationName} — Auto LPG Station${where ? ` in ${where}` : ""}` : "Station",
     description: `Auto LPG station${where ? ` in ${where}` : ""}. Working hours, directions and amenities.`,
-    // Point every variant of this page (legacy id URL, slug URL) at the one
-    // canonical slug address so the ranking isn't split across both.
-    alternates: { canonical: `${SITE_URL}/stations/${s.slug || s.id}` },
+    alternates: { canonical: `${SITE_URL}/stations/${pagePrefix}${s.slug || s.id}` },
   };
 }
 
-export default async function StationDetailPage({ params }: Props) {
-  const { id } = await params;
-  const s = await resolveStation(id);
-  if (!s) notFound();
-
-  // Stations used to live at /stations/<firestore-id>. Those URLs may be indexed
-  // or bookmarked, so they keep working — but send them on to the canonical slug
-  // with a 301 so the ranking consolidates on one address instead of two.
-  if (s.slug && s.slug !== id) permanentRedirect(`/stations/${s.slug}`);
-
+function StationDetailView({ s, backHref }: { s: any; backHref: string }) {
   const line = [s.address?.doorNo, s.address?.street].filter(Boolean).join(", ");
   const pincode = s.address?.pincode ? ` - ${s.address.pincode}` : "";
   const lat = s.location?.latitude;
@@ -63,7 +65,7 @@ export default async function StationDetailPage({ params }: Props) {
 
   return (
     <section className="container-x py-12">
-      <Link href="/stations" className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-brand">
+      <Link href={backHref} className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-brand">
         <ArrowLeft size={15} /> All stations
       </Link>
 
@@ -91,7 +93,7 @@ export default async function StationDetailPage({ params }: Props) {
 
           {features.length > 0 && (
             <div className="mt-5 flex flex-wrap gap-2">
-              {features.map((f) => (
+              {features.map((f: string) => (
                 <span key={f} className="rounded-full bg-lime/30 px-2.5 py-1 text-xs font-semibold text-brand-dark">{f}</span>
               ))}
             </div>
@@ -101,10 +103,6 @@ export default async function StationDetailPage({ params }: Props) {
             <Navigation size={16} /> Get Directions
           </Link>
 
-          {/* Location map — `flex-1` grows to fill the right column so its bottom
-              aligns exactly with the images grid on the left (no oversized min that
-              would push it past the grid). A small min-height keeps the map usable
-              on mobile (stacked) and as a floor when the grid is short. */}
           <div className="mt-4 flex-1 min-h-72 lg:min-h-40 overflow-hidden rounded-2xl border border-line">
             <iframe
               title={`${s.stationName ?? "Station"} location`}
@@ -118,4 +116,45 @@ export default async function StationDetailPage({ params }: Props) {
       </div>
     </section>
   );
+}
+
+export default async function StationCatchAllPage({ params }: Props) {
+  const { slug } = await params;
+  if (!slug || slug.length === 0) notFound();
+
+  // 1. Pagination page: /stations/07 or /stations/7
+  if (slug.length === 1 && /^\d+$/.test(slug[0])) {
+    const pageNum = Number.parseInt(slug[0], 10);
+    if (pageNum < 1) notFound();
+    return <StationsDirectory initialPage={pageNum} />;
+  }
+
+  // 2. Station detail with pagination prefix: /stations/07/[station-slug]
+  if (slug.length === 2 && /^\d+$/.test(slug[0])) {
+    const pagePrefix = slug[0];
+    const handle = slug[1];
+    const s = await resolveStation(handle);
+    if (!s) notFound();
+
+    if (s.slug && s.slug !== handle) {
+      permanentRedirect(`/stations/${pagePrefix}/${s.slug}`);
+    }
+
+    return <StationDetailView s={s} backHref={`/stations/${pagePrefix}`} />;
+  }
+
+  // 3. Station detail without page prefix: /stations/[station-slug]
+  if (slug.length === 1 && !/^\d+$/.test(slug[0])) {
+    const handle = slug[0];
+    const s = await resolveStation(handle);
+    if (!s) notFound();
+
+    if (s.slug && s.slug !== handle) {
+      permanentRedirect(`/stations/${s.slug}`);
+    }
+
+    return <StationDetailView s={s} backHref="/stations" />;
+  }
+
+  notFound();
 }

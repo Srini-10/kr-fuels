@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 // ISR: station network changes rarely — serve from cache, refresh in background.
 export const revalidate = 60;
 
-export default async function StationsPage() {
+export async function StationsDirectory({ initialPage = 1 }: { initialPage?: number }) {
   const stations = await getStations();
   // Real backend data wins; fall back to a representative set when empty.
   const list = stations.data.length ? stations.data : STATIONS_FALLBACK;
@@ -31,8 +31,12 @@ export default async function StationsPage() {
       </section>
 
       <section className="container-x py-14">
-        <StationsExplorer stations={list} />
+        <StationsExplorer stations={list} initialPage={initialPage} />
       </section>
     </>
   );
+}
+
+export default async function StationsPage() {
+  return <StationsDirectory initialPage={1} />;
 }
