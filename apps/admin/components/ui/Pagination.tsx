@@ -54,8 +54,8 @@ const Pagination: FC<PaginationProps> = ({ meta, page, loading = false, onPageCh
       {/* Prev */}
       <button
         aria-label="Previous page"
-        style={{ ...btn("ghost"), ...circleBtn }}
-        disabled={!meta.hasPrevPage || loading}
+        style={{ ...btn("ghost"), ...circleBtn, opacity: !meta.hasPrevPage ? 0.35 : 1 }}
+        disabled={!meta.hasPrevPage}
         onClick={() => onPageChange(page - 1)}
       >
         <ChevronLeft size={15} />
@@ -69,7 +69,6 @@ const Pagination: FC<PaginationProps> = ({ meta, page, loading = false, onPageCh
           <button
             key={`page-${i}`}
             onClick={() => onPageChange(p)}
-            disabled={loading}
             aria-label={`Page ${p}`}
             aria-current={page === p ? "page" : undefined}
             style={{
@@ -90,8 +89,8 @@ const Pagination: FC<PaginationProps> = ({ meta, page, loading = false, onPageCh
       {/* Next */}
       <button
         aria-label="Next page"
-        style={{ ...btn("ghost"), ...circleBtn }}
-        disabled={!meta.hasNextPage || loading}
+        style={{ ...btn("ghost"), ...circleBtn, opacity: !meta.hasNextPage ? 0.35 : 1 }}
+        disabled={!meta.hasNextPage}
         onClick={() => onPageChange(page + 1)}
       >
         <ChevronRight size={15} />

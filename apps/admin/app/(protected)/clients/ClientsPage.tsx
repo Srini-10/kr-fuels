@@ -39,7 +39,17 @@ const ClientsPage: FC = () => {
   // ── filters ──
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>("all");
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const searchTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSearchChange = (val: string) => {
+    setSearchInput(val);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => {
+      setSearch(val);
+    }, 300);
+  };
 
   // ── modals ──
   const [modalOpen, setModalOpen] = useState(false);
@@ -174,8 +184,8 @@ const ClientsPage: FC = () => {
         <div style={{ position: "relative", flex: "1 1 220px", maxWidth: 320 }}>
           <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: C.tm }} />
           <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Search by name…"
             style={{ ...inp(), paddingLeft: 30, width: "100%" }}
           />
