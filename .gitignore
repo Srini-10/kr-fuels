@@ -47,3 +47,15 @@ next-env.d.ts
 
 # one-off data/migration scripts (not part of the app)
 /tools/
+
+# keys & certificates (complements *.pem above)
+*.key
+*.ppk
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+*-service-account*.json
+*serviceaccount*.json
